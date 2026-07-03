@@ -1,0 +1,108 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  darkMode: "class",
+  theme: {
+    extend: {
+      "colors": {
+          "secondary-container": "#fed65b",
+          "on-primary-fixed-variant": "#324768",
+          "surface-container-low": "#ebf5ff",
+          "tertiary-fixed": "#e1e2e4",
+          "surface-variant": "#d5e4f2",
+          "surface": "#f6faff",
+          "on-background": "#0e1d27",
+          "on-secondary-fixed": "#241a00",
+          "inverse-on-surface": "#e5f2ff",
+          "primary": "#000d22",
+          "error": "#ba1a1a",
+          "on-secondary": "#ffffff",
+          "on-primary": "#ffffff",
+          "secondary-fixed": "#ffe088",
+          "on-primary-container": "#768baf",
+          "inverse-surface": "#24323d",
+          "error-container": "#ffdad6",
+          "on-tertiary-fixed": "#191c1e",
+          "on-secondary-fixed-variant": "#574500",
+          "surface-container-lowest": "#ffffff",
+          "primary-fixed": "#d5e3ff",
+          "secondary-fixed-dim": "#e9c349",
+          "tertiary": "#0a0d0f",
+          "primary-fixed-dim": "#b2c7ef",
+          "inverse-primary": "#b2c7ef",
+          "surface-bright": "#f6faff",
+          "on-tertiary-container": "#888a8c",
+          "tertiary-fixed-dim": "#c5c7c8",
+          "surface-tint": "#4a5f81",
+          "on-surface": "#0e1d27",
+          "surface-container-highest": "#d5e4f2",
+          "tertiary-container": "#202325",
+          "outline": "#74777e",
+          "surface-container-high": "#daeaf8",
+          "background": "#f6faff",
+          "on-surface-variant": "#44474e",
+          "primary-container": "#0a2342",
+          "on-secondary-container": "#745c00",
+          "surface-dim": "#ccdcea",
+          "surface-container": "#e0f0fe",
+          "on-primary-fixed": "#021c3a",
+          "outline-variant": "#c4c6cf",
+          "on-error-container": "#93000a",
+          "secondary": "#735c00",
+          "on-tertiary": "#ffffff",
+          "on-tertiary-fixed-variant": "#444749",
+          "on-error": "#ffffff",
+          "gold-accent": "#D4AF37"
+      },
+      "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+      },
+      "spacing": {
+          "lg": "48px",
+          "gutter": "24px",
+          "sm": "12px",
+          "xs": "4px",
+          "xl": "80px",
+          "container-max": "1280px",
+          "md": "24px",
+          "base": "8px"
+      },
+      "fontFamily": {
+          "label-md": ["Montserrat", "sans-serif"],
+          "headline-md": ["Poppins", "sans-serif"],
+          "display-lg": ["Poppins", "sans-serif"],
+          "body-lg": ["Montserrat", "sans-serif"],
+          "title-lg": ["Poppins", "sans-serif"],
+          "headline-lg": ["Poppins", "sans-serif"],
+          "headline-lg-mobile": ["Poppins", "sans-serif"],
+          "body-md": ["Montserrat", "sans-serif"]
+      },
+      "fontSize": {
+          "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+          "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+          "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+          "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+          "title-lg": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+          "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+          "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+          "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0', transform: 'translateY(-8px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+      },
+      animation: {
+        fadeIn: 'fadeIn 0.2s ease-out forwards',
+      },
+    }
+  },
+  plugins: [],
+}

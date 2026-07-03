@@ -1,0 +1,155 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=Poppins:wght@600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Colors */
+  --color-navy: #0A2342;
+  --color-navy-light: #1B3A6B;
+  --color-gold: #D4AF37;
+  --color-gold-light: #F0D060;
+  --color-white: #FFFFFF;
+  --color-grey-bg: #F5F6F8;
+  --color-grey-border: #E2E4E9;
+  --color-text-primary: #1A1A2E;
+  --color-text-secondary: #5A6070;
+  --color-success: #2ECC71;
+  --color-error: #E74C3C;
+  --color-whatsapp: #25D366;
+
+  /* Typography */
+  --font-headings: 'Poppins', sans-serif;
+  --font-body: 'Montserrat', sans-serif;
+
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-pill: 50px;
+
+  /* Shadows */
+  --shadow-card: 0 4px 20px rgba(10, 35, 66, 0.08);
+  --shadow-hover: 0 8px 30px rgba(10, 35, 66, 0.15);
+
+  /* Transitions */
+  --transition-fast: all 0.25s ease;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-grey-bg);
+  color: var(--color-text-primary);
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-headings);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: var(--transition-fast);
+}
+
+/* Reusable buttons based on system specs */
+.btn {
+  font-family: var(--font-body);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  border: none;
+  transition: var(--transition-fast);
+  padding: 12px 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-primary {
+  background-color: var(--color-gold);
+  color: var(--color-navy);
+  border-radius: var(--radius-pill);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-gold-light);
+}
+
+.btn-secondary {
+  background-color: var(--color-navy);
+  color: var(--color-white);
+  border-radius: var(--radius-pill);
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-navy-light);
+}
+
+.btn-outline {
+  border: 2px solid var(--color-navy);
+  color: var(--color-navy);
+  background-color: transparent;
+  border-radius: var(--radius-pill);
+}
+
+.btn-outline:hover {
+  background-color: var(--color-navy);
+  color: var(--color-white);
+}
+
+.btn-danger {
+  background-color: var(--color-error);
+  color: var(--color-white);
+  border-radius: var(--radius-pill);
+}
+
+.btn-danger:hover {
+  opacity: 0.9;
+}
+
+/* Custom Fallback Utilities for Tailwind compilation issues */
+.bg-gold-accent {
+  background-color: var(--color-gold) !important;
+}
+.bg-gold-accent-10, .bg-gold-accent\/10 {
+  background-color: rgba(212, 175, 55, 0.1) !important;
+}
+.text-gold-accent {
+  color: var(--color-gold) !important;
+}
+.border-gold-accent {
+  border-color: var(--color-gold) !important;
+}
+.border-gold-accent-30, .border-gold-accent\/30 {
+  border-color: rgba(212, 175, 55, 0.3) !important;
+}
+.border-gold-accent-40, .border-gold-accent\/40 {
+  border-color: rgba(212, 175, 55, 0.4) !important;
+}
+.text-white {
+  color: #ffffff !important;
+}
+.text-primary {
+  color: var(--color-navy) !important;
+}
+.bg-primary {
+  background-color: var(--color-navy) !important;
+}
+.bg-surface\/95 {
+  background-color: rgba(246, 250, 255, 0.95) !important;
+}
+.text-surface-variant {
+  color: #d5e4f2 !important;
+}
+.bg-secondary-container {
+  background-color: var(--color-gold) !important;
+}
