@@ -26,8 +26,10 @@ const AdminSidebar = () => {
 
   return (
     <aside className="h-screen w-64 fixed left-0 top-0 bg-[#000d22] flex flex-col py-6 border-r border-gold-accent/20 shadow-xl z-50 text-white">
-      <div className="px-6 mb-8 space-y-1">
-        <h1 className="font-poppins font-extrabold text-xl text-gold-accent">One Vendor</h1>
+      <div className="px-6 mb-8 space-y-2">
+        <Link to="/" className="flex items-center gap-2">
+          <img src="/logo.jpeg" alt="One Vendor Solutions" className="h-12 w-auto object-contain rounded" />
+        </Link>
         <p className="font-label-md text-[10px] text-surface-variant tracking-wider uppercase">Enterprise Admin</p>
       </div>
 

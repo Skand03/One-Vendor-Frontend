@@ -118,7 +118,7 @@ export const getOrganizationSchema = () => ({
       url: SITE_URL,
       logo: {
         '@type': 'ImageObject',
-        url: `${SITE_URL}/logo.jpg`,
+        url: `${SITE_URL}/logo.jpeg`,
         width: 200,
         height: 200,
       },
@@ -165,7 +165,7 @@ export const getOrganizationSchema = () => ({
         latitude: '26.7606',
         longitude: '83.3732',
       },
-      image: `${SITE_URL}/logo.jpg`,
+      image: `${SITE_URL}/logo.jpeg`,
       servesCuisine: 'B2B Procurement',
     },
     {

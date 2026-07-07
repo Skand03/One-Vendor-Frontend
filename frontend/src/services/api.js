@@ -113,7 +113,7 @@ export const api = {
           whatsappNumber: '918576084127',
           instagramUrl: 'https://www.instagram.com/onevendor.solutions?igsh=dDNoMWw1eHhxdHRn',
           aboutText: 'Experience unified B2B procurement designed for excellence. We simplify your supply chain by providing premium quality essentials for educational institutions, corporate spaces, and residential complexes—all under one reliable roof.',
-          logoUrl: '/logo.jpg'
+          logoUrl: '/logo.jpeg'
         });
       }
       const mapped = {

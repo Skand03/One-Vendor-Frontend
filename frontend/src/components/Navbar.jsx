@@ -73,7 +73,7 @@ const Navbar = ({ transparent = false }) => {
     >
       <div className="max-w-container-max mx-auto px-gutter h-full flex justify-between items-center">
         <Link className="flex items-center gap-2 h-full py-2" to="/">
-          <img src="/logo.jpg" alt="One Vendor Solutions" className="h-14 w-auto object-contain rounded" />
+          <img src="/logo.jpeg" alt="One Vendor Solutions" className="h-14 w-auto object-contain rounded" />
         </Link>
 
         <nav className="hidden md:flex items-center space-x-8">

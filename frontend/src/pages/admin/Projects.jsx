@@ -181,7 +181,7 @@ const Projects = () => {
               >
                 <div className="h-48 overflow-hidden relative bg-surface-dim">
                   <img 
-                    src={proj.imageUrl || '/logo.jpg'} 
+                    src={proj.imageUrl || '/logo.jpeg'} 
                     alt={proj.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"

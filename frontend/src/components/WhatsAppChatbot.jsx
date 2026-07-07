@@ -20,7 +20,7 @@ const WhatsAppChatbot = () => {
           <div className="bg-[#075E54] text-white p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-white/20 overflow-hidden flex items-center justify-center border border-white/20">
-                <img src="/logo.jpg" alt="OVS Logo" className="w-full h-full object-cover" />
+                <img src="/logo.jpeg" alt="OVS Logo" className="w-full h-full object-cover" />
               </div>
               <div>
                 <h4 className="font-bold text-body-md leading-tight">Ujjwal Pandey</h4>
@@ -50,7 +50,7 @@ const WhatsAppChatbot = () => {
             {/* CEO Message */}
             <div className="flex gap-2 items-start max-w-[85%]">
               <div className="w-8 h-8 rounded-full bg-white overflow-hidden flex-shrink-0 border border-outline-variant/20">
-                <img src="/logo.jpg" alt="OVS Logo" className="w-full h-full object-cover" />
+                <img src="/logo.jpeg" alt="OVS Logo" className="w-full h-full object-cover" />
               </div>
               <div className="bg-white text-on-surface p-3 rounded-lg rounded-tl-none shadow-sm text-xs leading-relaxed space-y-1">
                 <p className="font-semibold text-primary">Hello</p>

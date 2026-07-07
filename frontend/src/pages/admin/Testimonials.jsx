@@ -184,7 +184,7 @@ const Testimonials = () => {
                 <div className="mt-6 pt-4 border-t border-outline-variant/20 flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full overflow-hidden bg-surface-dim">
                     <img 
-                      src={t.imageUrl || '/logo.jpg'} 
+                      src={t.imageUrl || '/logo.jpeg'} 
                       alt={t.name}
                       className="w-full h-full object-cover"
                       loading="lazy"

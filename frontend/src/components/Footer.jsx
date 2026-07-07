@@ -43,7 +43,9 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-xl mb-xl">
           {/* Brand Info */}
           <div className="space-y-sm">
-            <h3 className="font-headline-md text-headline-md font-bold text-white mb-sm">{currentSettings.companyName}</h3>
+            <Link to="/" className="flex items-center gap-2 mb-3">
+              <img src="/logo.jpeg" alt="One Vendor Solutions" className="h-12 w-auto object-contain rounded" />
+            </Link>
             <p className="font-body-md text-body-md text-surface-variant max-w-xs leading-relaxed">
               {currentSettings.aboutText}
             </p>

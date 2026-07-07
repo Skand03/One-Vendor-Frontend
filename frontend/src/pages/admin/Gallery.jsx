@@ -171,7 +171,7 @@ const Gallery = () => {
               >
                 <div className="h-56 overflow-hidden relative bg-surface-dim">
                   <img 
-                    src={item.imageUrl || '/logo.jpg'} 
+                    src={item.imageUrl || '/logo.jpeg'} 
                     alt={item.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"

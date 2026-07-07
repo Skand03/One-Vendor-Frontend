@@ -8,25 +8,8 @@ export default defineConfig({
   // ─── Build Optimization ───────────────────────────────────
   build: {
     target: 'es2015',
-    minify: 'esbuild',
-    cssMinify: true,
     reportCompressedSize: true,
     chunkSizeWarningLimit: 600,
-    rollupOptions: {
-      output: {
-        // Manual chunk splitting for optimal caching
-        manualChunks: {
-          // Core React runtime — rarely changes
-          'vendor-react': ['react', 'react-dom'],
-          // Routing — rarely changes
-          'vendor-router': ['react-router-dom'],
-          // Framer motion — large, isolate it
-          'vendor-motion': ['framer-motion'],
-          // Supabase — large, isolate it
-          'vendor-supabase': ['@supabase/supabase-js'],
-        },
-      },
-    },
   },
 
   // ─── Dev Server ───────────────────────────────────────────
