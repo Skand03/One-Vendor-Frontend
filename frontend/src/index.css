@@ -153,3 +153,7 @@ a {
 .bg-secondary-container {
   background-color: var(--color-gold) !important;
 }
+
+/* Hide scrollbar for category pill row on mobile */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

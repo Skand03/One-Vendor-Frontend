@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+
 
 const Navbar = ({ transparent = false }) => {
   const location = useLocation();
@@ -9,8 +9,7 @@ const Navbar = ({ transparent = false }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const dropdownRef = useRef(null);
-  const { user, isLoggedIn, logout } = useAuth();
+    const dropdownRef = useRef(null);
 
   useEffect(() => {
     if (!transparent) return;
@@ -62,11 +61,7 @@ const Navbar = ({ transparent = false }) => {
     return baseClass + inactiveClass;
   };
 
-  const handleLogout = () => {
-    logout();
-    setShowDropdown(false);
-    navigate('/');
-  };
+
 
   return (
     <header 
@@ -94,82 +89,7 @@ const Navbar = ({ transparent = false }) => {
             Book a Service / Enquiry
           </Link>
 
-          {/* Profile / Login Button */}
-          {isLoggedIn ? (
-            <div className="relative" ref={dropdownRef}>
-              <button
-                onClick={() => setShowDropdown(!showDropdown)}
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all border-2 ${
-                  isHeaderTransparent
-                    ? 'border-white/40 bg-white/10 hover:bg-white/20 text-white'
-                    : 'border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary'
-                }`}
-              >
-                <span className="material-symbols-outlined text-[22px]">person</span>
-              </button>
 
-              {/* Dropdown Menu */}
-              {showDropdown && (
-                <div className="absolute right-0 top-14 w-56 bg-white rounded-xl shadow-2xl border border-outline-variant/20 overflow-hidden animate-fadeIn z-[60]">
-                  <div className="px-4 py-3 bg-surface-container-lowest border-b border-outline-variant/20">
-                    <p className="font-label-md text-label-md text-primary font-bold truncate">
-                      {user?.fullName || 'Customer'}
-                    </p>
-                    <p className="text-[11px] text-on-surface-variant truncate">
-                      {user?.email || 'customer@ovs.com'}
-                    </p>
-                  </div>
-                  <div className="py-1">
-                    <Link
-                      to="/my-account"
-                      onClick={() => setShowDropdown(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 text-body-md text-on-surface hover:bg-surface-container-high transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-[18px] text-on-surface-variant">account_circle</span>
-                      My Account
-                    </Link>
-                    <Link
-                      to="/book-slot"
-                      onClick={() => setShowDropdown(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 text-body-md text-on-surface hover:bg-surface-container-high transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-[18px] text-on-surface-variant">calendar_today</span>
-                      My Bookings
-                    </Link>
-                    <Link
-                      to="/enquiry"
-                      onClick={() => setShowDropdown(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 text-body-md text-on-surface hover:bg-surface-container-high transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-[18px] text-on-surface-variant">receipt_long</span>
-                      My Enquiries
-                    </Link>
-                  </div>
-                  <div className="border-t border-outline-variant/20 py-1">
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-body-md text-red-600 hover:bg-red-50 transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">logout</span>
-                      Logout
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            <Link
-              to="/login"
-              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all border-2 ${
-                isHeaderTransparent
-                  ? 'border-white/40 bg-white/10 hover:bg-white/20 text-white'
-                  : 'border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary'
-              }`}
-              title="Login / Sign Up"
-            >
-              <span className="material-symbols-outlined text-[22px]">person</span>
-            </Link>
-          )}
 
           {/* Mobile Hamburger */}
           <button
@@ -203,11 +123,7 @@ const Navbar = ({ transparent = false }) => {
               <Link to="/book-slot" onClick={() => setShowMobileMenu(false)} className="flex items-center gap-3 px-4 py-3 rounded-lg bg-gold-accent text-primary font-bold text-body-md transition-colors">
                 <span className="material-symbols-outlined text-[20px]">event_available</span> Book a Service / Enquiry
               </Link>
-              {!isLoggedIn && (
-                <Link to="/login" onClick={() => setShowMobileMenu(false)} className="flex items-center gap-3 px-4 py-3 rounded-lg text-body-md text-primary font-semibold hover:bg-surface-container-high transition-colors mt-1">
-                  <span className="material-symbols-outlined text-[20px]">login</span> Login / Sign Up
-                </Link>
-              )}
+
             </div>
           </nav>
         </div>

@@ -1,361 +1,351 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { setMetaTags } from '../../utils/seo';
-import { supabase } from '../../services/supabaseClient';
+import api from '../../services/api';
 
 const BookSlot = () => {
-  const [selectedDay, setSelectedDay] = useState(10);
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState('11:00 AM');
-  const [fullName, setFullName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [requirementType, setRequirementType] = useState('Consultation');
-  const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState('');
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Dynamic Route States
+  const initialCategoryId = location.state?.initialCategoryId || '';
+  const initialServiceId = location.state?.initialServiceId || '';
+
+  // Core Data States
+  const [categories, setCategories] = useState([]);
+  const [services, setServices] = useState([]);
+  const [loadingServices, setLoadingServices] = useState(false);
+
+  // Form Fields
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    address: '',
+    preferredDate: '',
+    timeSlot: 'MORNING_10_TO_12', // Matches TimeSlot enum in backend
+    message: '',
+    categoryId: initialCategoryId,
+    serviceId: initialServiceId
+  });
+
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     setMetaTags(
-      'Book a Sourcing Consultation Slot',
-      'Schedule a personalized B2B sourcing consultation slot with our verified vendor experts. Select your preferred date, time, and requirement category.'
+      'Book a Procurement Service Slot',
+      'Schedule a personalized B2B sourcing consultation or site inspection. Select your category, service, preferred date, and time slot.'
     );
+
+    // Fetch categories on load
+    const fetchCategories = async () => {
+      try {
+        const res = await api.get('/categories');
+        setCategories(res.data);
+      } catch (err) {
+        console.error('Error fetching categories:', err);
+      }
+    };
+    fetchCategories();
   }, []);
 
-  const handleDaySelect = (day) => {
-    setSelectedDay(day);
+  // Fetch services when category changes
+  useEffect(() => {
+    if (!formData.categoryId) {
+      setServices([]);
+      return;
+    }
+    
+    const fetchServices = async () => {
+      setLoadingServices(true);
+      try {
+        const res = await api.get(`/services?categoryId=${formData.categoryId}`);
+        setServices(res.data);
+        // Clear or set default service if previous selection is invalid
+        if (!res.data.find(s => s.id === parseInt(formData.serviceId))) {
+          setFormData(prev => ({ ...prev, serviceId: res.data[0]?.id || '' }));
+        }
+      } catch (err) {
+        console.error('Error fetching services:', err);
+      } finally {
+        setLoadingServices(false);
+      }
+    };
+    fetchServices();
+  }, [formData.categoryId]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleTimeSlotSelect = (slot) => {
-    setSelectedTimeSlot(slot);
-  };
-
-  const handleConfirmBooking = async () => {
-    if (!fullName || !phone) {
-      alert('Please fill in your Full Name and Phone Number first!');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.categoryId || !formData.serviceId) {
+      alert('Please select both a Category and Service.');
       return;
     }
 
-    setLoading(true);
-    setStatus('');
-
+    setSubmitting(true);
     try {
-      const { error } = await supabase.from('bookings').insert([
-        {
-          full_name: fullName,
-          phone: phone,
-          requirement_type: requirementType,
-          date: `2024-10-${selectedDay.toString().padStart(2, '0')}`,
-          time_slot: selectedTimeSlot
-        }
-      ]);
+      const payload = {
+        ...formData,
+        categoryId: parseInt(formData.categoryId),
+        serviceId: parseInt(formData.serviceId)
+      };
 
-      if (error) throw error;
+      const res = await api.post('/bookings', payload);
+      // Retrieve names to pass to confirmation page
+      const categoryName = categories.find(c => c.id === payload.categoryId)?.name || '';
+      const serviceName = services.find(s => s.id === payload.serviceId)?.name || '';
 
-      setStatus('success');
-      setFullName('');
-      setPhone('');
+      navigate('/confirmation', { 
+        state: { 
+          booking: res.data, 
+          categoryName, 
+          serviceName 
+        } 
+      });
     } catch (err) {
-      console.error('Error saving booking:', err);
-      setStatus('error');
+      console.error('Error creating booking:', err);
+      alert('There was a problem confirming your booking. Please check the details and try again.');
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
-  // Helper to check if a day is selectable
-  const calendarDays = [
-    { num: 29, currentMonth: false },
-    { num: 30, currentMonth: false },
-    { num: 1, currentMonth: true },
-    { num: 2, currentMonth: true },
-    { num: 3, currentMonth: true },
-    { num: 4, currentMonth: true },
-    { num: 5, currentMonth: true },
-    { num: 6, currentMonth: true },
-    { num: 7, currentMonth: true },
-    { num: 8, currentMonth: true },
-    { num: 9, currentMonth: true },
-    { num: 10, currentMonth: true },
-    { num: 11, currentMonth: true },
-    { num: 12, currentMonth: true },
-    { num: 13, currentMonth: true },
-    { num: 14, currentMonth: true },
-    { num: 15, currentMonth: true },
-    { num: 16, currentMonth: true },
-    { num: 17, currentMonth: true },
-    { num: 18, currentMonth: true },
-    { num: 19, currentMonth: true },
-    { num: 20, currentMonth: true },
-    { num: 21, currentMonth: true },
-    { num: 22, currentMonth: true },
-    { num: 23, currentMonth: true },
-    { num: 24, currentMonth: true },
-    { num: 25, currentMonth: true },
-    { num: 26, currentMonth: true }
+  // Time slot options matching Backend TimeSlot enum
+  const timeSlots = [
+    { value: 'MORNING_10_TO_12', label: 'Morning (10:00 AM - 12:00 PM)' },
+    { value: 'AFTERNOON_12_TO_3', label: 'Early Afternoon (12:00 PM - 03:00 PM)' },
+    { value: 'AFTERNOON_3_TO_6', label: 'Late Afternoon (03:00 PM - 06:00 PM)' },
+    { value: 'EVENING_6_TO_8', label: 'Evening (06:00 PM - 08:00 PM)' }
   ];
 
   return (
-    <>
+    <div className="min-h-screen bg-surface font-body-md text-on-surface">
       <Navbar />
 
-      <main className="flex-grow w-full max-w-container-max mx-auto px-gutter pt-32 pb-xl">
-        <div className="mb-lg">
-          <h1 className="text-display-lg font-display-lg text-primary mb-xs">Book a Service Slot</h1>
-          <p className="text-body-lg text-on-surface-variant max-w-2xl">Streamline your procurement process by scheduling a consultation or inspection with our verified vendor network.</p>
+      <main className="max-w-container-max mx-auto px-gutter pt-32 pb-xl">
+        <div className="mb-lg text-center md:text-left space-y-3">
+          <h1 className="text-4xl font-poppins font-extrabold text-primary">Book a Service Slot</h1>
+          <p className="text-body-lg text-on-surface-variant max-w-2xl text-sm">
+            Schedule a certified sourcing site inspection, product design meeting, or B2B consultancy session.
+          </p>
+          <div className="w-24 h-1 bg-gold-accent mt-3 rounded-full mx-auto md:mx-0"></div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-lg">
-          {/* Calendar Selector */}
-          <div className="lg:col-span-7">
-            <div className="bg-white rounded-xl shadow-[0px_4px_20px_rgba(10,35,66,0.05)] p-md gold-border-top h-full">
-              <div className="flex justify-between items-center mb-md px-2">
-                <h2 className="text-headline-md font-headline-md text-primary">October 2024</h2>
-                <div className="flex gap-sm">
-                  <button className="p-2 hover:bg-surface-container rounded-full transition-all">
-                    <span className="material-symbols-outlined">chevron_left</span>
-                  </button>
-                  <button className="p-2 hover:bg-surface-container rounded-full transition-all">
-                    <span className="material-symbols-outlined">chevron_right</span>
-                  </button>
-                </div>
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Main Booking Form */}
+          <div className="lg:col-span-8 bg-white p-8 rounded-2xl shadow-xl border border-outline-variant/20 relative">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <h3 className="font-poppins font-bold text-lg text-primary border-b pb-2">1. Booking Particulars</h3>
               
-              <div className="calendar-grid text-center font-label-md text-outline mb-sm">
-                <div>SUN</div><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div>
-              </div>
-
-              <div className="calendar-grid gap-2">
-                {calendarDays.map((day, idx) => {
-                  if (!day.currentMonth) {
-                    return (
-                      <div key={idx} className="h-14 flex items-center justify-center text-outline-variant">
-                        {day.num}
-                      </div>
-                    );
-                  }
-                  
-                  const isSelected = selectedDay === day.num;
-                  return (
-                    <div
-                      key={idx}
-                      onClick={() => handleDaySelect(day.num)}
-                      className={`h-14 flex items-center justify-center rounded-lg font-semibold cursor-pointer transition-all border ${
-                        isSelected 
-                          ? 'bg-primary text-on-primary border-2 border-gold-accent shadow-md' 
-                          : 'bg-surface-container text-primary hover:bg-surface-container-high border-transparent'
-                      }`}
-                    >
-                      {day.num}
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="mt-md flex items-center gap-md text-label-md">
-                <div className="flex items-center gap-xs"><span className="w-3 h-3 bg-primary border border-gold-accent rounded-sm"></span> Selected</div>
-                <div className="flex items-center gap-xs"><span className="w-3 h-3 bg-surface-container rounded-sm"></span> Available</div>
-                <div className="flex items-center gap-xs"><span className="w-3 h-3 bg-white border border-outline-variant rounded-sm"></span> Booked</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Time Slot & Summary */}
-          <div className="lg:col-span-5 flex flex-col gap-md">
-            <div className="bg-white rounded-xl shadow-[0px_4px_20px_rgba(10,35,66,0.05)] p-md gold-border-top">
-              <h2 className="text-title-lg font-title-lg text-primary mb-md">Select Time Slot</h2>
-              
-              <div className="space-y-md">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <span className="font-label-md text-on-surface-variant uppercase mb-sm block">Morning</span>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-sm">
-                    {['09:00 AM', '10:30 AM', '11:00 AM'].map((slot) => {
-                      const isSelected = selectedTimeSlot === slot;
-                      return (
-                        <button
-                          key={slot}
-                          onClick={() => handleTimeSlotSelect(slot)}
-                          className={`px-4 py-2 rounded-full border text-body-md font-semibold transition-all ${
-                            isSelected 
-                              ? 'bg-primary text-on-primary border-primary' 
-                              : 'border-outline-variant text-body-md hover:border-gold-accent hover:text-primary'
-                          }`}
-                        >
-                          {slot}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div>
-                  <span className="font-label-md text-on-surface-variant uppercase mb-sm block">Afternoon</span>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-sm">
-                    {['01:30 PM', '03:00 PM', '04:30 PM'].map((slot) => {
-                      const isSelected = selectedTimeSlot === slot;
-                      return (
-                        <button
-                          key={slot}
-                          onClick={() => handleTimeSlotSelect(slot)}
-                          className={`px-4 py-2 rounded-full border text-body-md font-semibold transition-all ${
-                            isSelected 
-                              ? 'bg-primary text-on-primary border-primary' 
-                              : 'border-outline-variant text-body-md hover:border-gold-accent hover:text-primary'
-                          }`}
-                        >
-                          {slot}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div>
-                  <span className="font-label-md text-on-surface-variant uppercase mb-sm block">Evening</span>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-sm">
-                    {['06:00 PM', '07:30 PM'].map((slot) => {
-                      const isSelected = selectedTimeSlot === slot;
-                      return (
-                        <button
-                          key={slot}
-                          onClick={() => handleTimeSlotSelect(slot)}
-                          className={`px-4 py-2 rounded-full border text-body-md font-semibold transition-all ${
-                            isSelected 
-                              ? 'bg-primary text-on-primary border-primary' 
-                              : 'border-outline-variant text-body-md hover:border-gold-accent hover:text-primary'
-                          }`}
-                        >
-                          {slot}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Booking Summary */}
-            <div className="bg-primary text-on-primary rounded-xl p-md shadow-lg relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-4 opacity-10">
-                <span className="material-symbols-outlined text-[100px]">event_available</span>
-              </div>
-              <h3 className="text-title-lg font-title-lg mb-md relative z-10">Booking Summary</h3>
-              
-              <div className="space-y-sm mb-lg relative z-10">
-                <div className="flex items-center gap-sm">
-                  <span className="material-symbols-outlined text-secondary-fixed">calendar_today</span>
-                  <span className="text-body-lg">Thursday, Oct {selectedDay}th, 2024</span>
-                </div>
-                <div className="flex items-center gap-sm">
-                  <span className="material-symbols-outlined text-secondary-fixed">schedule</span>
-                  <span className="text-body-lg">{selectedTimeSlot}</span>
-                </div>
-                <div className="flex items-center gap-sm">
-                  <span className="material-symbols-outlined text-secondary-fixed">verified</span>
-                  <span className="text-body-lg">{requirementType}</span>
-                </div>
-              </div>
-
-              {status === 'success' && (
-                <div className="p-3 bg-green-100/10 text-green-300 rounded-lg text-body-md font-semibold mb-4">
-                  Booking confirmed successfully! We will contact you soon.
-                </div>
-              )}
-
-              {status === 'error' && (
-                <div className="p-3 bg-red-50/10 text-red-600 rounded-lg text-body-md font-semibold mb-4">
-                  Booking error. Please check database tables and try again.
-                </div>
-              )}
-
-              <div className="space-y-sm relative z-10">
-                <button 
-                  disabled={loading}
-                  onClick={handleConfirmBooking}
-                  className="w-full py-3 bg-secondary-fixed text-primary rounded-lg font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-md border-b-2 border-gold-accent flex items-center justify-center gap-2"
-                >
-                  {loading ? (
-                    <span className="material-symbols-outlined animate-spin text-[18px]">sync</span>
-                  ) : 'Confirm Booking'}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Personal Details Form */}
-          <div className="lg:col-span-12">
-            <div className="bg-white rounded-xl shadow-[0px_4px_20px_rgba(10,35,66,0.05)] p-md gold-border-top">
-              <h2 className="text-title-lg font-title-lg text-primary mb-md">Personal Details</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-md items-end">
-                <div className="space-y-xs">
-                  <label className="font-label-md text-on-surface-variant">Full Name</label>
-                  <input 
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="w-full border border-outline-variant rounded-lg p-3 focus:ring-1 focus:ring-gold-accent focus:border-gold-accent outline-none" 
-                    placeholder="John Doe" 
-                    type="text"
-                  />
-                </div>
-                <div className="space-y-xs">
-                  <label className="font-label-md text-on-surface-variant">Phone Number</label>
-                  <input 
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="w-full border border-outline-variant rounded-lg p-3 focus:ring-1 focus:ring-gold-accent focus:border-gold-accent outline-none" 
-                    placeholder="+91 85760 84127" 
-                    type="tel"
-                  />
-                </div>
-                <div className="space-y-xs">
-                  <label className="font-label-md text-on-surface-variant">Requirement Type</label>
+                  <label className="font-label-md text-label-md text-on-surface-variant block mb-1">Select Category</label>
                   <select 
-                    value={requirementType}
-                    onChange={(e) => setRequirementType(e.target.value)}
-                    className="w-full border border-outline-variant rounded-lg p-3 focus:ring-1 focus:ring-gold-accent focus:border-gold-accent outline-none bg-white"
+                    name="categoryId"
+                    required
+                    value={formData.categoryId}
+                    onChange={handleChange}
+                    className="w-full rounded-lg border-outline-variant focus:border-gold-accent focus:ring-1 focus:ring-gold-accent p-3 text-body-md"
                   >
-                    <option value="Consultation">Consultation</option>
-                    <option value="Vendor Audit">Vendor Audit</option>
-                    <option value="Sample Review">Sample Review</option>
-                    <option value="Contract Signing">Contract Signing</option>
+                    <option value="">Select Category</option>
+                    {categories.map(c => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="font-label-md text-label-md text-on-surface-variant block mb-1">Select Service</label>
+                  <select 
+                    name="serviceId"
+                    required
+                    disabled={!formData.categoryId || loadingServices}
+                    value={formData.serviceId}
+                    onChange={handleChange}
+                    className="w-full rounded-lg border-outline-variant focus:border-gold-accent focus:ring-1 focus:ring-gold-accent p-3 text-body-md bg-white disabled:opacity-50"
+                  >
+                    <option value="">{loadingServices ? 'Loading services...' : 'Select Service'}</option>
+                    {services.map(s => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
                   </select>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
 
-        <div className="mt-xl grid grid-cols-1 md:grid-cols-2 gap-lg items-center">
-          <div className="order-2 md:order-1">
-            <h2 className="text-headline-md font-headline-md text-primary mb-sm">Why Book with One Vendor?</h2>
-            <ul className="space-y-md">
-              <li className="flex items-start gap-md">
-                <div className="bg-surface-container-low p-2 rounded-lg text-primary">
-                  <span className="material-symbols-outlined">security</span>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h4 className="font-bold text-body-lg">Verified Professionals</h4>
-                  <p className="text-body-md text-on-surface-variant">Every vendor in our system undergoes a rigorous 50-point compliance check.</p>
+                  <label className="font-label-md text-label-md text-on-surface-variant block mb-1">Preferred Date</label>
+                  <input 
+                    type="date"
+                    name="preferredDate"
+                    required
+                    min={new Date().toISOString().split('T')[0]} // Can't book past dates
+                    value={formData.preferredDate}
+                    onChange={handleChange}
+                    className="w-full rounded-lg border-outline-variant focus:border-gold-accent focus:ring-1 focus:ring-gold-accent p-3 text-body-md"
+                  />
                 </div>
-              </li>
-              <li className="flex items-start gap-md">
-                <div className="bg-surface-container-low p-2 rounded-lg text-primary">
-                  <span className="material-symbols-outlined">history</span>
-                </div>
+                
                 <div>
-                  <h4 className="font-bold text-body-lg">Real-time Tracking</h4>
-                  <p className="text-body-md text-on-surface-variant">Monitor your service status and deliverables through our integrated dashboard.</p>
+                  <label className="font-label-md text-label-md text-on-surface-variant block mb-1">Preferred Time Slot</label>
+                  <select 
+                    name="timeSlot"
+                    required
+                    value={formData.timeSlot}
+                    onChange={handleChange}
+                    className="w-full rounded-lg border-outline-variant focus:border-gold-accent focus:ring-1 focus:ring-gold-accent p-3 text-body-md"
+                  >
+                    {timeSlots.map(t => (
+                      <option key={t.value} value={t.value}>{t.label}</option>
+                    ))}
+                  </select>
                 </div>
-              </li>
-            </ul>
+              </div>
+
+              <h3 className="font-poppins font-bold text-lg text-primary border-b pb-2 pt-4">2. Contact &amp; Site Address</h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="font-label-md text-label-md text-on-surface-variant block mb-1">Full Name</label>
+                  <input 
+                    type="text"
+                    name="fullName"
+                    required
+                    placeholder="Enter your name"
+                    value={formData.fullName}
+                    onChange={handleChange}
+                    className="w-full rounded-lg border-outline-variant focus:border-gold-accent focus:ring-1 focus:ring-gold-accent p-3 text-body-md"
+                  />
+                </div>
+                
+                <div>
+                  <label className="font-label-md text-label-md text-on-surface-variant block mb-1">Phone Number</label>
+                  <input 
+                    type="tel"
+                    name="phone"
+                    required
+                    placeholder="Enter phone number"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className="w-full rounded-lg border-outline-variant focus:border-gold-accent focus:ring-1 focus:ring-gold-accent p-3 text-body-md"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-6">
+                <div>
+                  <label className="font-label-md text-label-md text-on-surface-variant block mb-1">Email Address</label>
+                  <input 
+                    type="email"
+                    name="email"
+                    required
+                    placeholder="Enter email address"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full rounded-lg border-outline-variant focus:border-gold-accent focus:ring-1 focus:ring-gold-accent p-3 text-body-md"
+                  />
+                </div>
+                
+                <div>
+                  <label className="font-label-md text-label-md text-on-surface-variant block mb-1">Site Delivery Address</label>
+                  <input 
+                    type="text"
+                    name="address"
+                    required
+                    placeholder="Street, City, Pin Code"
+                    value={formData.address}
+                    onChange={handleChange}
+                    className="w-full rounded-lg border-outline-variant focus:border-gold-accent focus:ring-1 focus:ring-gold-accent p-3 text-body-md"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-label-md text-label-md text-on-surface-variant block mb-1">Custom Notes / Sourcing Requirements</label>
+                  <textarea 
+                    name="message"
+                    rows="3"
+                    placeholder="Specify dimensions, colors, quantity requirements, etc."
+                    value={formData.message}
+                    onChange={handleChange}
+                    className="w-full rounded-lg border-outline-variant focus:border-gold-accent focus:ring-1 focus:ring-gold-accent p-3 text-body-md"
+                  ></textarea>
+                </div>
+              </div>
+
+              <button 
+                type="submit"
+                disabled={submitting}
+                className="w-full bg-gold-accent hover:bg-[#c5a02e] text-primary font-bold py-4 rounded-lg shadow-lg transition-all transform active:scale-[0.98] flex items-center justify-center gap-2"
+              >
+                {submitting ? (
+                  <>
+                    <span className="material-symbols-outlined animate-spin text-[18px]">sync</span>
+                    Confirming Booking...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-[18px]">event_available</span>
+                    Confirm and Book Slot
+                  </>
+                )}
+              </button>
+            </form>
           </div>
-          <div className="order-1 md:order-2 rounded-xl overflow-hidden shadow-xl aspect-video relative group">
-            <div className="absolute inset-0 bg-primary/20 group-hover:bg-primary/10 transition-all z-10"></div>
-            <img className="w-full h-full object-cover" alt="Corporate meeting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUYzC5fUrEdaOphkhrhxxkr2q-opOKDszOZKQkIjoiP8xMYxLe9SGxJGMEnIm1M-FUA6h28FytsacS8ZQOXATIf_WVAavSZTEKLUllZFgYvyDw_hnm1XYyel2etkBMheFEeH3TOhaCyTa0M5d4rne93AVVcGKhYnAk7Tkm2bHamOj0krGuqS7iOWL2PDHDilOHSS5UGMywDNqciUTgewEoA5mZR4HuNob7JfDeMB5Raeg8MTYXm3r1iH2QRHDDRW_c6FtNhXP94ik"/>
+
+          {/* Right Sourcing Info Card */}
+          <div className="lg:col-span-4 space-y-6">
+            <div className="bg-primary text-white rounded-2xl p-6 shadow-lg border-b-4 border-gold-accent relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                <span className="material-symbols-outlined text-[120px]">verified_user</span>
+              </div>
+              <h4 className="font-poppins font-bold text-lg mb-4 text-gold-accent">The OVS Guarantee</h4>
+              <ul className="space-y-4 text-xs leading-relaxed text-surface-variant">
+                <li className="flex items-start gap-2">
+                  <span className="material-symbols-outlined text-gold-accent text-[16px]">check_circle</span>
+                  <span><strong>Turnkey Delivery:</strong> Consolidated sourcing means one team handles site audit, installation, and cleanup.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="material-symbols-outlined text-gold-accent text-[16px]">check_circle</span>
+                  <span><strong>Direct Cost Benefit:</strong> Consolidated billing allows up to 15% wholesale discount margins.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="material-symbols-outlined text-gold-accent text-[16px]">check_circle</span>
+                  <span><strong>Pre-Vetted Supply Chain:</strong> All raw timber, tiles, paint, and lab kits meet stringent IS/ISO quality guidelines.</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 border border-outline-variant/30 text-center space-y-4">
+              <div className="w-12 h-12 bg-primary-container text-gold-accent rounded-full flex items-center justify-center mx-auto">
+                <span className="material-symbols-outlined">headset_mic</span>
+              </div>
+              <h5 className="font-poppins font-bold text-primary text-sm">Need Direct Sourcing?</h5>
+              <p className="text-xs text-on-surface-variant leading-relaxed">Rather speak directly to our founder? Tap below to start a WhatsApp dialogue immediately.</p>
+              <a 
+                href="https://wa.me/918576084127?text=Hello%20One%20Vendor%20Solutions,%20I%20need%20your%20service." 
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex w-full items-center justify-center gap-2 bg-[#25D366] text-white py-3 rounded-lg font-bold text-xs hover:bg-[#20ba5a] transition-all shadow"
+              >
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                  <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.417-.003 6.557-5.338 11.892-11.893 11.892-1.997-.001-3.951-.5-5.688-1.448l-6.305 1.652zm6.599-3.835c1.516.899 3.3 1.374 5.24 1.375 5.405 0 9.803-4.397 9.805-9.805.001-2.618-1.02-5.08-2.871-6.932-1.851-1.852-4.314-2.872-6.931-2.872-5.405 0-9.803 4.398-9.806 9.806 0 2.077.52 4.108 1.503 5.9l-.99 3.616 3.699-.971zm11.367-5.115c-.314-.157-1.859-.918-2.148-1.023-.288-.105-.499-.157-.709.157-.21.314-.813 1.023-.996 1.232-.183.21-.367.236-.681.079-.314-.157-1.325-.488-2.525-1.558-.933-.832-1.563-1.86-1.747-2.174-.183-.314-.02-.485.137-.642.142-.141.314-.367.471-.55.157-.184.21-.314.314-.524.105-.21.053-.393-.026-.55-.079-.157-.709-1.705-.971-2.334-.255-.612-.513-.529-.709-.538-.182-.008-.393-.01-.603-.01-.21 0-.551.079-.839.393s-1.101 1.075-1.101 2.622c0 1.547 1.127 3.044 1.284 3.254.157.21 2.217 3.386 5.371 4.748.75.324 1.335.518 1.791.663.753.239 1.438.205 1.98.124.605-.09 1.859-.76 2.121-1.496.262-.736.262-1.364.183-1.496-.079-.131-.288-.21-.603-.367z"></path>
+                </svg>
+                WhatsApp Direct Chat
+              </a>
+            </div>
           </div>
         </div>
       </main>
 
       <Footer />
-    </>
+    </div>
   );
 };
 

@@ -1,208 +1,294 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import api from '../../services/api';
 import { setMetaTags } from '../../utils/seo';
 
-const initialProducts = [
-  {
-    id: 1,
-    name: 'Premium School Blazers',
-    category: 'Uniforms',
-    tag: 'Premium Tier',
-    desc: 'Tailored from durable, high-GSM wool-blend fabric with reinforced stitching for longevity.',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuALZUVwHXovrdb2XW9-NLVvbY50s0jiHFpTzpL08S9Yoq_kZmMBTQZ2d5GVPJF0fASiai2yPoalcMAvCvOgbE_NlL-vhWAA_qMPEGW5vC5GRi2ihn28wFibDjeOkpNUVpaWTBnjc1R8Jb7AgHP7bwPtt4vUjjO9BrL_L2cMjyjucNthsAEoFSybmqImmU0-pu9TbTL37N5I-gIR0DsUxWGArI5k4X8DbcLp5L1P4B-bjZ60E8w-d1DgujwgeVPnzMK6Kj7SSmj9cKU'
-  },
-  {
-    id: 2,
-    name: 'Ergonomic Study Desks',
-    category: 'Furniture',
-    tag: 'In Stock',
-    desc: 'Adjustable height desks designed to promote healthy posture in students of all ages.',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDwUnDAYsIKEjs8dVLmonati8pZxIJq-se-2U2tUVdtDSLtIt3v43j-dO8bPfBk0g7sI1khuRgVuXxQXa4LQ9u-RTs1Uw4ETn12uu2PJjqkRo90q0_QZpbj7_x-V5ELC9k4w-IR_PMRND19LJeIvwEtQ5V6FQkyqpYvVT238J7MNrkyYmtCb-pRMdqVVbRw3vi32973Dj271I-GnttQAj7BX_GOjwkTNSbyvAWNi10xOkMj_HJ_d2OMPdebRYxUSOVTItoq5rVbCEw'
-  },
-  {
-    id: 3,
-    name: 'Elite Stationery Kits',
-    category: 'Stationery',
-    tag: 'Best Seller',
-    desc: 'Comprehensive school kits featuring high-grade paper and durable writing instruments.',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDgoKccdjLOIhjyo9IgiKN2DxdoIN_8kPc38uTciEMWPGZeBvch6oEPW-FZcUYFmhfQGR22-u2nQ7bDZWYZRmHeOjMs_LQ5C0xqdG3GDDLtOmAp23DXIf3tiUIMSba-YaSfV2exCocVp6xq9iPInLXb-iVG2KKIc2VRuLi0OoTIiiOIk3ljNUYMUAdOhcai0VJQzZBUfhiVj190zkU0v0pxtPrgCIh5mIEKbU4uLWW5xoxjE1Uy97w3bRb74ibjhsk7eaRga1gL4AQ'
-  },
-  {
-    id: 4,
-    name: 'Advanced Stem Library',
-    category: 'Books',
-    tag: 'Curated Collection',
-    desc: 'Full curriculum textbook sets for K-12 STEM subjects with digital companion licenses.',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCnTw1Zt6U0JlyMp22qCDewbamz8l0Wg2niz0MWKf2_zRxtseRtIWWpm1R_ocBItF9EXvmHZXGNratBIwElMqvgauoOj2mwMNDyD9ojWuWAgMm46f8fAlOrzKyABp6XIPMzbKfBXSeEfLOsT-EQg13X76Ha9YwiuUZ7Ff-7Q5G42UdSK1u5Q5yxsqcBsIsXSqs85x7_klmb0PS9gBmXLywXDUs-mTtAOYTBz8UsdcGyOL7-7yh0fd1q-kadXhksG1Q6QtAlduo8Ef0'
-  },
-  {
-    id: 5,
-    name: 'Athletic Performance Gear',
-    category: 'Sports Gear',
-    tag: 'Durable Wear',
-    desc: 'Moisture-wicking fabrics and high-durability sports kits for competitive school teams.',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBt_jNdyqSdwGIgXYX6uZQtCW6S69N7bDftbw22BUyodf0bLWhKAmaNKsO9kE26zbTiXkn6wabD_QvMc0BJ5zhEZZ2xJmteOwW4xYOpaaS1CW0yxkd-7anXpArlaazw6yudrrz5n5hyyfw7EUO0dhwg3-1wFwOw1IwwjAGuJz6j2xAkzyc7gSTTCeO-m1q-zUfqZdjxn6FJgZw9vnVydEuwx5-dSsS72z1O16scnOEkrIQ7Vi7UJMFFR3IYtxqV2nDb0rxahh4_sAM'
-  },
-  {
-    id: 6,
-    name: 'Classroom Storage Units',
-    category: 'Furniture',
-    tag: 'Modular Design',
-    desc: 'Versatile, space-saving storage solutions with safety-lock mechanisms for schools.',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBbs54XdYI9x1oey1fYywldgOnA1a6qw5bhSF1y77e36Vc25hxx73ifrXxfQSXyIQmDMGZUS4g_VNlX2KUFqcfVAMLAY5awbihebt2gLkAk6kbdKJyACrjUM_ozz-ltZNADgJ4rQpbmeDn8SyHR6fIHYUi01T34h3vALtGJTuJZ2DGmVK06r6jiic2QIT0N4qvktc9232iYhzv9JZgxzJnXkaC2Zr7blSg-2SzLbIPJnog8n0Dg5hdUf7mb65vHsi5CkO3THBaXLLc'
-  }
-];
-
 const Catalog = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategories, setSelectedCategories] = useState([]);
-  const categoriesList = ['Uniforms', 'Books', 'Stationery', 'Furniture', 'Sports Gear'];
+  const { category: categoryParam } = useParams();
+  const navigate = useNavigate();
 
+  // Core Data States
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Filter States
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTags, setSelectedTags] = useState([]);
+
+  // Fetch categories on load
   useEffect(() => {
-    setMetaTags(
-      'Product Categories Catalog',
-      'Browse our wholesale product catalog of School essentials, Office requirements, and Home bulk essentials. Find uniforms, books, stationery, desks, and more.'
-    );
+    const fetchCategories = async () => {
+      try {
+        const res = await api.get('/categories');
+        setCategories(res.data);
+      } catch (err) {
+        console.error('Error fetching categories:', err);
+      }
+    };
+    fetchCategories();
   }, []);
 
-  const handleCategoryToggle = (category) => {
-    if (selectedCategories.includes(category)) {
-      setSelectedCategories(selectedCategories.filter(cat => cat !== category));
-    } else {
-      setSelectedCategories([...selectedCategories, category]);
-    }
-  };
+  // Update selected category when parameter changes or categories load
+  useEffect(() => {
+    if (categories.length === 0) return;
 
-  const filteredProducts = initialProducts.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          product.desc.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(product.category);
-    return matchesSearch && matchesCategory;
+    let targetCategory = null;
+    if (categoryParam) {
+      // Find category by parsing parameter (e.g., "School-Essentials" -> "School Essentials")
+      const parsedParamName = categoryParam.replace(/-/g, ' ').toLowerCase();
+      targetCategory = categories.find(
+        (c) => c.name.toLowerCase() === parsedParamName || c.name.toLowerCase().replace(/\s+/g, '-') === categoryParam
+      );
+    }
+
+    // Default to first category if none matched or provided
+    if (!targetCategory) {
+      targetCategory = categories[0];
+    }
+
+    setSelectedCategory(targetCategory);
+    
+    // Set dynamic metadata SEO tags
+    setMetaTags(
+      `${targetCategory.name} Catalog`,
+      `Explore premium B2B products and professional installation services in ${targetCategory.name}. Bulk procurement made simple by One Vendor Solutions.`
+    );
+  }, [categoryParam, categories]);
+
+  // Fetch services when selected category changes
+  useEffect(() => {
+    if (!selectedCategory) return;
+
+    const fetchServices = async () => {
+      setLoading(true);
+      try {
+        const res = await api.get(`/services?categoryId=${selectedCategory.id}`);
+        setServices(res.data);
+      } catch (err) {
+        console.error('Error fetching services:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchServices();
+  }, [selectedCategory]);
+
+
+  // Filter logic
+  const filteredServices = services.filter((service) => {
+    const matchesSearch =
+      service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      service.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesSearch;
   });
 
+  // Unique service names to mock tag filters
+  const mockTags = ['Premium Tier', 'Standard Quality', 'Turnkey Work', 'AMC Cover'];
+
   return (
-    <>
+    <div className="min-h-screen bg-surface font-body-md text-on-surface">
       <Navbar />
-      <main className="max-w-container-max mx-auto px-md lg:px-lg pt-32 pb-md">
-        <div className="mb-lg">
-          <nav className="flex items-center gap-xs text-on-surface-variant font-label-md mb-base">
+
+      <main className="max-w-container-max mx-auto px-4 sm:px-gutter pt-24 pb-xl">
+        {/* Breadcrumb & Header */}
+        <div className="mb-6 pt-4">
+          <nav className="flex items-center gap-2 text-on-surface-variant font-label-md mb-4">
             <Link to="/" className="hover:text-primary transition-colors">Home</Link>
             <span className="material-symbols-outlined text-[16px]">chevron_right</span>
-            <Link to="/catalog" className="hover:text-primary transition-colors">Catalog</Link>
-            <span className="material-symbols-outlined text-[16px]">chevron_right</span>
-            <span className="text-primary font-semibold">School Essentials</span>
+            <span className="text-primary font-semibold">Catalog</span>
+            {selectedCategory && (
+              <>
+                <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+                <span className="text-gold-accent font-semibold">{selectedCategory.name}</span>
+              </>
+            )}
           </nav>
-          <h1 className="text-display-lg font-display-lg text-primary-container">School Essentials</h1>
-          <p className="text-body-lg text-on-surface-variant mt-xs max-w-2xl">
-            Premium bulk supplies for educational institutions. Source high-quality uniforms, stationery, and furniture with expert procurement support.
-          </p>
+
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-poppins font-extrabold text-primary leading-tight">
+                {selectedCategory?.name || 'Loading Catalog...'}
+              </h1>
+              <p className="text-on-surface-variant mt-2 max-w-2xl text-sm">
+                {selectedCategory?.description || 'Consolidated procurement and direct bulk supply for corporate workspaces and institutions.'}
+              </p>
+            </div>
+            
+            <Link 
+              to="/book-slot" 
+              className="bg-gold-accent hover:bg-[#c5a02e] text-primary font-bold px-6 py-3 rounded-lg shadow-md transition-all flex items-center justify-center gap-2 text-xs shrink-0"
+            >
+              <span className="material-symbols-outlined text-[18px]">calendar_month</span>
+              Book Consultation Slot
+            </Link>
+          </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-lg">
-          <aside className="w-full md:w-64 flex-shrink-0">
-            <div className="bg-surface-container-low p-md rounded-xl border border-outline-variant/20 sticky top-32">
-              <div className="mb-md">
-                <h3 className="font-headline-md text-[18px] text-primary-container mb-xs">Catalog Filters</h3>
-                <p className="text-label-md text-on-surface-variant mb-md">Browse by category</p>
-                <div className="relative mb-md">
+        {/* Main Two-Column Layout */}
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
+          {/* Sidebar Navigation & Filters — mobile: horizontal scroll, desktop: sticky */}
+          <aside className="w-full lg:w-72 flex-shrink-0">
+            {/* Mobile: horizontal category pill scroller */}
+            <div className="lg:hidden flex overflow-x-auto gap-2 pb-2 -mx-1 px-1 no-scrollbar">
+              {categories.map((cat) => {
+                const isActive = selectedCategory?.id === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => navigate(`/catalog/${cat.name.replace(/\s+/g, '-')}`)}
+                    className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold border transition-all ${
+                      isActive
+                        ? 'bg-primary text-gold-accent border-primary shadow-sm'
+                        : 'bg-white text-on-surface-variant border-outline-variant hover:border-primary hover:text-primary'
+                    }`}
+                  >
+                    {cat.name}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Desktop: full sidebar */}
+            <div className="hidden lg:block bg-white p-6 rounded-xl border border-outline-variant/35 shadow-sm space-y-8 sticky top-24">
+              <div>
+                <h3 className="font-poppins font-bold text-lg text-primary mb-1">Search &amp; Filter</h3>
+                <p className="text-xs text-on-surface-variant mb-4">Find items in this catalog</p>
+                
+                <div className="relative">
                   <input 
-                    className="w-full bg-white border border-outline-variant/50 rounded-lg pl-10 pr-4 py-2 text-body-md focus:border-secondary-fixed-dim focus:ring-1 focus:ring-secondary-fixed-dim outline-none" 
-                    placeholder="Search Products" 
                     type="text"
+                    placeholder="Search catalog items..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full rounded-lg border-outline-variant focus:border-gold-accent focus:ring-1 focus:ring-gold-accent pl-10 pr-4 py-2.5 text-body-md"
                   />
-                  <span className="material-symbols-outlined absolute left-3 top-2.5 text-on-surface-variant text-[20px]">search</span>
+                  <span className="material-symbols-outlined absolute left-3 top-3 text-on-surface-variant text-[18px]">search</span>
                 </div>
               </div>
 
-              <div className="space-y-md">
-                <div>
-                  <h4 className="font-label-md text-primary mb-sm uppercase tracking-wider">Sub-categories</h4>
-                  <div className="space-y-sm">
-                    {categoriesList.map(category => {
-                      const isChecked = selectedCategories.includes(category);
-                      return (
-                        <label key={category} className="flex items-center gap-sm group cursor-pointer sidebar-item transition-transform">
-                          <input 
-                            className="rounded text-primary focus:ring-primary w-5 h-5 border-outline-variant" 
-                            type="checkbox"
-                            checked={isChecked}
-                            onChange={() => handleCategoryToggle(category)}
-                          />
-                          <span className={`text-body-md transition-colors ${isChecked ? 'text-primary font-semibold' : 'text-on-surface group-hover:text-primary'}`}>
-                            {category}
-                          </span>
-                        </label>
-                      );
-                    })}
-                  </div>
-                </div>
-                <div className="pt-md border-t border-outline-variant/30">
-                  <Link to="/enquiry" className="w-full bg-secondary-container text-on-secondary-container py-3 rounded-lg font-label-md hover:bg-secondary-fixed transition-colors flex items-center justify-center gap-sm shadow-sm">
-                    <span className="material-symbols-outlined text-[18px]">request_quote</span>
-                    Bulk Enquiry
-                  </Link>
+              {/* Verticals Quick Selector */}
+              <div className="space-y-3">
+                <h4 className="font-label-md text-primary font-bold uppercase tracking-wider text-xs border-b pb-2">Catalog Verticals</h4>
+                <div className="flex flex-col gap-2">
+                  {categories.map((cat) => {
+                    const isActive = selectedCategory?.id === cat.id;
+                    return (
+                      <button
+                        key={cat.id}
+                        onClick={() => navigate(`/catalog/${cat.name.replace(/\s+/g, '-')}`)}
+                        className={`text-left px-4 py-3 rounded-lg text-xs font-bold transition-all flex items-center justify-between ${
+                          isActive 
+                            ? 'bg-primary text-gold-accent border-l-4 border-gold-accent shadow-sm' 
+                            : 'bg-surface hover:bg-surface-container-low text-on-surface-variant hover:text-primary'
+                        }`}
+                      >
+                        <span>{cat.name}</span>
+                        <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
+
+              {/* Quick Sourcing Contact Info */}
+              <div className="bg-[#000d22]/5 p-4 rounded-xl border border-gold-accent/15 space-y-2 text-center">
+                <h5 className="font-bold text-primary text-xs">Need Bulk Custom Quotes?</h5>
+                <p className="text-[10px] text-on-surface-variant leading-relaxed">Submit a custom booking details or call us directly for bulk pricing negotiations.</p>
+                <Link 
+                  to="/contact" 
+                  className="inline-block w-full bg-primary hover:bg-primary-container text-white py-2 rounded-lg font-bold text-xs shadow transition-all"
+                >
+                  Submit Custom RFQ
+                </Link>
+              </div>
+            </div>
+
+            {/* Mobile search bar below the pills */}
+            <div className="lg:hidden mt-3 relative">
+              <input 
+                type="text"
+                placeholder="Search catalog items..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-lg border border-outline-variant focus:border-gold-accent focus:ring-1 focus:ring-gold-accent pl-10 pr-4 py-2.5 text-sm"
+              />
+              <span className="material-symbols-outlined absolute left-3 top-3 text-on-surface-variant text-[18px]">search</span>
             </div>
           </aside>
 
-          <section className="flex-grow">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
-              {filteredProducts.map(product => (
-                <div key={product.id} className="premium-card bg-white rounded-xl overflow-hidden shadow-[0px_4px_20px_rgba(10,35,66,0.05)] flex flex-col h-full border border-outline-variant/20 hover:border-secondary transition-all duration-300">
-                  <div className="h-56 bg-surface-container-high relative group">
-                    <img className="w-full h-full object-cover" src={product.image} alt={product.name}/>
-                    <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  </div>
-                  <div className="p-md flex flex-col flex-grow">
-                    <div className="flex items-center gap-xs mb-xs">
-                      <span className="w-2 h-2 rounded-full bg-secondary-fixed-dim"></span>
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-secondary">{product.tag}</span>
-                    </div>
-                    <h3 className="text-title-lg font-title-lg text-primary-container mb-xs">{product.name}</h3>
-                    <p className="text-body-md text-on-surface-variant mb-md flex-grow leading-relaxed">{product.desc}</p>
-                    <Link to="/enquiry" className="w-full py-3 bg-white border-2 border-secondary-fixed-dim text-secondary font-bold rounded-lg hover:bg-secondary-fixed-dim/10 transition-all flex items-center justify-center gap-xs">
-                      Enquiry for Bulk Price
-                    </Link>
-                  </div>
-                </div>
-              ))}
-
-              {filteredProducts.length === 0 && (
-                <div className="col-span-full py-xl text-center space-y-md">
-                  <span className="material-symbols-outlined text-6xl text-outline-variant">search_off</span>
-                  <h3 className="font-headline-md text-primary">No Products Found</h3>
-                  <p className="text-body-md text-on-surface-variant max-w-sm mx-auto">
-                    No items match your search "{searchQuery}" or selected category filters. Try resetting the filters.
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {filteredProducts.length > 0 && (
-              <div className="mt-xl flex flex-col items-center gap-md">
-                <div className="flex items-center gap-sm">
-                  <span className="text-body-md text-on-surface-variant">Showing {filteredProducts.length} of {initialProducts.length} products</span>
-                  <div className="h-1 w-48 bg-surface-container-highest rounded-full overflow-hidden">
-                    <div className="h-full bg-secondary-fixed-dim" style={{ width: `${(filteredProducts.length / initialProducts.length) * 100}%` }}></div>
-                  </div>
-                </div>
-                <button className="bg-primary text-white px-lg py-3 rounded-full font-label-md hover:bg-primary-container transition-all flex items-center gap-sm shadow-lg active:scale-95 group">
-                  Load More Products
-                  <span className="material-symbols-outlined group-hover:translate-y-1 transition-transform">keyboard_arrow_down</span>
-                </button>
+          {/* Catalog Services Display */}
+          <section className="flex-grow w-full">
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-24 space-y-4">
+                <span className="material-symbols-outlined animate-spin text-4xl text-gold-accent">sync</span>
+                <span className="text-xs text-on-surface-variant font-bold">Fetching high-quality catalog items...</span>
               </div>
+            ) : (
+              <AnimatePresence mode="wait">
+                <motion.div 
+                  layout
+                  className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
+                >
+                  {filteredServices.map((service, idx) => (
+                    <motion.div 
+                      key={service.id}
+                      layout
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: idx * 0.05 }}
+                      className="bg-white rounded-xl overflow-hidden shadow-card border border-outline-variant/20 hover:border-gold-accent transition-all duration-300 hover:-translate-y-1 hover:shadow-hover flex flex-col h-full"
+                    >
+                      <div className="h-48 relative overflow-hidden group">
+                        <img 
+                          src={service.imageUrl || "https://images.unsplash.com/photo-1548345680-f5475ea5df84?w=500"} 
+                          alt={service.name} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                        />
+                      </div>
+                      
+                      <div className="p-6 flex flex-col flex-grow space-y-3">
+                        <div className="flex items-center gap-1.5 text-gold-accent">
+                          <span className="w-1.5 h-1.5 rounded-full bg-gold-accent"></span>
+                          <span className="text-[10px] font-bold uppercase tracking-widest">{mockTags[idx % mockTags.length]}</span>
+                        </div>
+                        <h3 className="font-title-lg text-primary font-bold leading-tight">{service.name}</h3>
+                        <p className="text-on-surface-variant text-xs leading-relaxed flex-grow line-clamp-3">{service.description}</p>
+                        
+                        <Link 
+                          to="/book-slot" 
+                          state={{ initialCategoryId: selectedCategory?.id, initialServiceId: service.id }}
+                          className="w-full py-3 bg-primary-container text-white hover:bg-primary font-bold rounded-lg text-xs transition-all flex items-center justify-center gap-1"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">calendar_month</span>
+                          Book Installation Slot
+                        </Link>
+                      </div>
+                    </motion.div>
+                  ))}
+
+                  {filteredServices.length === 0 && (
+                    <div className="col-span-full py-20 text-center space-y-4">
+                      <span className="material-symbols-outlined text-6xl text-outline-variant">search_off</span>
+                      <h3 className="font-poppins font-bold text-xl text-primary">No Catalog Items Found</h3>
+                      <p className="text-xs text-on-surface-variant max-w-sm mx-auto">
+                        No service matching "{searchQuery}" is active in the {selectedCategory?.name} category. Check another category or try resetting filters.
+                      </p>
+                    </div>
+                  )}
+                </motion.div>
+              </AnimatePresence>
             )}
           </section>
         </div>
       </main>
 
       <Footer />
-    </>
+    </div>
   );
 };
 

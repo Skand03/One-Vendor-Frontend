@@ -1,14 +1,16 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAdminAuth } from '../context/AdminAuthContext';
 
 const AdminSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { adminLogout } = useAdminAuth();
   const currentPath = location.pathname;
 
   const handleLogout = () => {
-    alert('Logged out successfully (Supabase Simulation).');
-    navigate('/login');
+    adminLogout();
+    navigate('/admin/login');
   };
 
   const navItems = [
@@ -20,10 +22,10 @@ const AdminSidebar = () => {
   ];
 
   return (
-    <aside className="h-screen w-64 fixed left-0 top-0 bg-primary-container dark:bg-primary-container flex flex-col py-md border-r border-secondary/30 shadow-md z-50 text-on-primary-container">
-      <div className="px-6 mb-xl">
-        <h1 className="font-headline-md text-headline-md font-bold text-surface">ProcureLink</h1>
-        <p className="font-label-md text-label-md text-on-primary-container tracking-wider mt-xs">Enterprise Admin</p>
+    <aside className="h-screen w-64 fixed left-0 top-0 bg-[#000d22] flex flex-col py-6 border-r border-gold-accent/20 shadow-xl z-50 text-white">
+      <div className="px-6 mb-8 space-y-1">
+        <h1 className="font-poppins font-extrabold text-xl text-gold-accent">One Vendor</h1>
+        <p className="font-label-md text-[10px] text-surface-variant tracking-wider uppercase">Enterprise Admin</p>
       </div>
 
       <nav className="flex-grow space-y-1 overflow-y-auto px-4 custom-scrollbar">
@@ -33,25 +35,25 @@ const AdminSidebar = () => {
             <Link
               key={item.path}
               to={item.path}
-              className={`flex items-center gap-4 px-4 py-3 rounded-lg font-body-md text-body-md transition-all duration-200 ease-in-out ${
+              className={`flex items-center gap-4 px-4 py-3.5 rounded-lg text-xs font-bold transition-all duration-200 ${
                 isActive
-                  ? 'bg-secondary-container/20 text-secondary-fixed font-bold border-r-4 border-secondary'
-                  : 'text-on-primary-container/70 hover:bg-primary hover:text-on-primary'
+                  ? 'bg-gold-accent/15 text-gold-accent border-l-4 border-gold-accent shadow-sm'
+                  : 'text-surface-variant/70 hover:bg-primary-container hover:text-white'
               }`}
             >
-              <span className="material-symbols-outlined">{item.icon}</span>
+              <span className="material-symbols-outlined text-[18px]">{item.icon}</span>
               <span>{item.label}</span>
             </Link>
           );
         })}
       </nav>
 
-      <div className="px-4 mt-auto pt-md border-t border-on-primary-container/10">
+      <div className="px-4 mt-auto pt-4 border-t border-outline-variant/10">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-4 px-4 py-3 text-on-primary-container/70 hover:text-error transition-colors duration-200 ease-in-out font-body-md text-body-md"
+          className="w-full flex items-center gap-4 px-4 py-3.5 rounded-lg text-xs font-bold text-surface-variant/70 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200"
         >
-          <span className="material-symbols-outlined">logout</span>
+          <span className="material-symbols-outlined text-[18px]">logout</span>
           <span>Logout</span>
         </button>
       </div>

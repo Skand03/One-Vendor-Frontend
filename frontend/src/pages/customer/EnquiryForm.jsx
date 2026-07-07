@@ -3,15 +3,16 @@ import { Link } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { setMetaTags } from '../../utils/seo';
-import { supabase } from '../../services/supabaseClient';
+import api from '../../services/api';
 
 const EnquiryForm = () => {
+  const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState({
     fullName: '',
     organization: '',
     contactNumber: '',
     email: '',
-    category: 'School Essentials',
+    categoryId: '',
     detailedRequirement: '',
     preferredSlot: ''
   });
@@ -21,8 +22,21 @@ const EnquiryForm = () => {
   useEffect(() => {
     setMetaTags(
       'Request a Quote',
-      'Request a custom wholesale price quote for School, Office, or Home bulk supplies. Upload your procurement list and get a response within 24 hours.'
+      'Request a custom wholesale price quote for School, Office, or Home bulk supplies. Get a response within 24 hours.'
     );
+
+    const loadCategories = async () => {
+      try {
+        const res = await api.get('/categories');
+        setCategories(res.data);
+        if (res.data.length > 0) {
+          setFormData(prev => ({ ...prev, categoryId: res.data[0].id.toString() }));
+        }
+      } catch (err) {
+        console.error('Error fetching categories:', err);
+      }
+    };
+    loadCategories();
   }, []);
 
   const handleChange = (e) => {
@@ -36,32 +50,37 @@ const EnquiryForm = () => {
     setStatus('');
 
     try {
-      const { error } = await supabase.from('enquiries').insert([
-        {
-          full_name: formData.fullName,
-          organization: formData.organization,
-          contact_number: formData.contactNumber,
-          email: formData.email,
-          category: formData.category,
-          detailed_requirement: formData.detailedRequirement,
-          preferred_date: formData.preferredSlot
-        }
-      ]);
+      const selectedCatId = parseInt(formData.categoryId);
+      const preferredDateVal = formData.preferredSlot 
+        ? formData.preferredSlot.split('T')[0] 
+        : new Date().toISOString().split('T')[0];
 
-      if (error) throw error;
+      // Submit quote request as a booking entry
+      const payload = {
+        fullName: formData.fullName,
+        phone: formData.contactNumber,
+        email: formData.email,
+        address: formData.organization || 'Individual Procurement Lead',
+        preferredDate: preferredDateVal,
+        timeSlot: 'ANYTIME',
+        message: `Detailed requirements: ${formData.detailedRequirement}`,
+        categoryId: selectedCatId,
+        serviceId: null // General consultation request
+      };
 
+      await api.post('/bookings', payload);
       setStatus('success');
       setFormData({
         fullName: '',
         organization: '',
         contactNumber: '',
         email: '',
-        category: 'School Essentials',
+        categoryId: categories[0]?.id.toString() || '',
         detailedRequirement: '',
         preferredSlot: ''
       });
     } catch (err) {
-      console.error('Error saving enquiry:', err);
+      console.error('Error saving quote enquiry:', err);
       setStatus('error');
     } finally {
       setLoading(false);
@@ -69,109 +88,107 @@ const EnquiryForm = () => {
   };
 
   return (
-    <>
+    <div className="min-h-screen bg-surface font-body-md text-on-surface">
       <Navbar />
       
       <main className="max-w-container-max mx-auto px-gutter pt-32 pb-xl">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-xl items-start">
-          <div className="lg:col-span-5 space-y-md">
-            <div className="space-y-sm">
-              <span className="text-secondary font-label-md text-label-md tracking-widest uppercase">Premium Procurement</span>
-              <h1 className="font-display-lg text-display-lg text-primary leading-tight">Get Your Custom Procurement Plan</h1>
-              <p className="font-body-lg text-body-lg text-on-surface-variant max-w-md">
-                Simplify your supply chain with a dedicated partner. We provide bespoke sourcing solutions for institutions, offices, and large-scale residential needs.
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+          <div className="lg:col-span-5 space-y-6">
+            <div className="space-y-4">
+              <span className="text-gold-accent font-label-md text-xs tracking-widest uppercase block font-bold">Premium Sourcing</span>
+              <h1 className="font-poppins font-extrabold text-3xl text-primary leading-tight">Get Your Custom Procurement Plan</h1>
+              <p className="text-xs text-on-surface-variant leading-relaxed">
+                Simplify your supply chain with a dedicated vendor. We provide bespoke sourcing solutions for institutions, offices, and large-scale residential needs.
               </p>
             </div>
             
-            <div className="space-y-6 pt-md">
-              <div className="flex items-start gap-4 p-md bg-white rounded-xl shadow-sm border-l-4 border-secondary">
-                <div className="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center flex-shrink-0">
-                  <span className="material-symbols-outlined text-secondary" style={{fontSize: "28px"}}>payments</span>
+            <div className="space-y-4 pt-4">
+              <div className="flex items-start gap-4 p-4 bg-white rounded-xl shadow border-l-4 border-gold-accent">
+                <div className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center flex-shrink-0 text-gold-accent">
+                  <span className="material-symbols-outlined" style={{fontSize: "24px"}}>payments</span>
                 </div>
                 <div>
-                  <h3 className="font-title-lg text-title-lg text-primary">Bulk Pricing Models</h3>
-                  <p className="font-body-md text-body-md text-on-surface-variant">Unlock exclusive wholesale rates tailored to your volume requirements.</p>
+                  <h3 className="font-bold text-xs text-primary">Bulk Pricing Models</h3>
+                  <p className="text-[11px] text-on-surface-variant mt-0.5">Unlock wholesale rates tailored to your volume requirements.</p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-4 p-md bg-white rounded-xl shadow-sm border-l-4 border-secondary">
-                <div className="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center flex-shrink-0">
-                  <span className="material-symbols-outlined text-secondary" style={{fontSize: "28px"}}>inventory_2</span>
+              <div className="flex items-start gap-4 p-4 bg-white rounded-xl shadow border-l-4 border-gold-accent">
+                <div className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center flex-shrink-0 text-gold-accent">
+                  <span className="material-symbols-outlined" style={{fontSize: "24px"}}>inventory_2</span>
                 </div>
                 <div>
-                  <h3 className="font-title-lg text-title-lg text-primary">Single Vendor for All Needs</h3>
-                  <p className="font-body-md text-body-md text-on-surface-variant">One invoice, one point of contact, thousands of categorized products.</p>
+                  <h3 className="font-bold text-xs text-primary">Single Vendor for All Needs</h3>
+                  <p className="text-[11px] text-on-surface-variant mt-0.5">One invoice, one point of contact, thousands of products.</p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-4 p-md bg-white rounded-xl shadow-sm border-l-4 border-secondary">
-                <div className="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center flex-shrink-0">
-                  <span className="material-symbols-outlined text-secondary" style={{fontSize: "28px"}}>speed</span>
+              <div className="flex items-start gap-4 p-4 bg-white rounded-xl shadow border-l-4 border-gold-accent">
+                <div className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center flex-shrink-0 text-gold-accent">
+                  <span className="material-symbols-outlined" style={{fontSize: "24px"}}>speed</span>
                 </div>
                 <div>
-                  <h3 className="font-title-lg text-title-lg text-primary">Fast Turnaround Times</h3>
-                  <p className="font-body-md text-body-md text-on-surface-variant">Priority processing and logistics for all corporate and educational accounts.</p>
+                  <h3 className="font-bold text-xs text-primary">Fast Turnaround Times</h3>
+                  <p className="text-[11px] text-on-surface-variant mt-0.5">Priority logistics for all corporate accounts.</p>
                 </div>
               </div>
-            </div>
-
-            <div className="pt-md">
-              <div className="w-full h-48 rounded-xl bg-cover bg-center premium-card" style={{backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBZrN-oeJuzdB-dBTI9tpKPe71f2I6vvdP-H3VIjZ2npsxwGos3u6JPK7a2ROs-mB7cMaXs0yymwS-ak6gujey3e4slFaAVerexM6mhKzpey5CRzGPDAyZ1ef-73gIkpIG9INTShcaFLlSlJhS6phvXdhHopk1V6_0cwFYuNt4p5kKPqwgnd_xC4A0nClcadkuVH0JkEXdymfLHeYce5QM0JzSQFVf3cti1XuuWLHSCJF-cQblep_KIr_pqR7KbfVEVVHLYVfYMdHY')"}}></div>
             </div>
           </div>
 
           <div className="lg:col-span-7">
-            <div className="bg-white p-8 md:p-10 rounded-xl premium-card">
-              <h2 className="font-headline-md text-headline-md text-primary mb-8">Request a Quotation</h2>
+            <div className="bg-white p-8 md:p-10 rounded-2xl shadow border border-outline-variant/30">
+              <h2 className="font-poppins font-extrabold text-xl text-primary mb-6">Request a Quotation</h2>
               
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-1">
-                    <label className="font-label-md text-label-md text-on-surface-variant block">Full Name</label>
+              <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="font-label-md text-[10px] text-on-surface-variant font-bold uppercase tracking-wider block mb-1">Full Name</label>
                     <input 
                       name="fullName"
                       value={formData.fullName}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-outline-variant rounded-lg font-body-md gold-border-focus outline-none" 
+                      className="w-full rounded-lg border-outline-variant focus:border-gold-accent focus:ring-1 focus:ring-gold-accent p-2.5 text-body-md" 
                       placeholder="John Doe" 
                       required 
                       type="text"
                     />
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="font-label-md text-label-md text-on-surface-variant block">Company/School/Organization</label>
+                  <div>
+                    <label className="font-label-md text-[10px] text-on-surface-variant font-bold uppercase tracking-wider block mb-1">Company / Organization</label>
                     <input 
                       name="organization"
                       value={formData.organization}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-outline-variant rounded-lg font-body-md gold-border-focus outline-none" 
+                      className="w-full rounded-lg border-outline-variant focus:border-gold-accent focus:ring-1 focus:ring-gold-accent p-2.5 text-body-md" 
                       placeholder="Global Tech Corp" 
                       required 
                       type="text"
                     />
                   </div>
+                </div>
 
-                  <div className="space-y-1">
-                    <label className="font-label-md text-label-md text-on-surface-variant block">Contact Number</label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="font-label-md text-[10px] text-on-surface-variant font-bold uppercase tracking-wider block mb-1">Contact Number</label>
                     <input 
                       name="contactNumber"
                       value={formData.contactNumber}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-outline-variant rounded-lg font-body-md gold-border-focus outline-none" 
+                      className="w-full rounded-lg border-outline-variant focus:border-gold-accent focus:ring-1 focus:ring-gold-accent p-2.5 text-body-md" 
                       placeholder="+91 85760 84127" 
                       required 
                       type="tel"
                     />
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="font-label-md text-label-md text-on-surface-variant block">Email Address</label>
+                  <div>
+                    <label className="font-label-md text-[10px] text-on-surface-variant font-bold uppercase tracking-wider block mb-1">Email Address</label>
                     <input 
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-outline-variant rounded-lg font-body-md gold-border-focus outline-none" 
+                      className="w-full rounded-lg border-outline-variant focus:border-gold-accent focus:ring-1 focus:ring-gold-accent p-2.5 text-body-md" 
                       placeholder="john@company.com" 
                       required 
                       type="email"
@@ -179,76 +196,72 @@ const EnquiryForm = () => {
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="font-label-md text-label-md text-on-surface-variant block">Requirement Category</label>
+                <div>
+                  <label className="font-label-md text-[10px] text-on-surface-variant font-bold uppercase tracking-wider block mb-1">Requirement Category</label>
                   <select 
-                    name="category"
-                    value={formData.category}
+                    name="categoryId"
+                    value={formData.categoryId}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-outline-variant rounded-lg font-body-md gold-border-focus outline-none bg-white"
+                    className="w-full rounded-lg border-outline-variant focus:border-gold-accent focus:ring-1 focus:ring-gold-accent p-2.5 text-body-md bg-white cursor-pointer"
                   >
-                    <option>School Essentials</option>
-                    <option>Office Requirements</option>
-                    <option>Home Essentials</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
                   </select>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="font-label-md text-label-md text-on-surface-variant block">Detailed Requirement</label>
+                <div>
+                  <label className="font-label-md text-[10px] text-on-surface-variant font-bold uppercase tracking-wider block mb-1">Detailed Requirement Description</label>
                   <textarea 
                     name="detailedRequirement"
                     value={formData.detailedRequirement}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-outline-variant rounded-lg font-body-md gold-border-focus outline-none resize-none" 
-                    placeholder="Describe your procurement needs in detail..." 
+                    className="w-full rounded-lg border-outline-variant focus:border-gold-accent focus:ring-1 focus:ring-gold-accent p-2.5 text-body-md" 
+                    placeholder="Describe your procurement specifications in detail..." 
                     rows="4"
                     required
                   ></textarea>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="font-label-md text-label-md text-on-surface-variant block">Preferred Date/Slot for Consultation</label>
+                <div>
+                  <label className="font-label-md text-[10px] text-on-surface-variant font-bold uppercase tracking-wider block mb-1">Preferred Consultation Date</label>
                   <input 
                     name="preferredSlot"
                     value={formData.preferredSlot}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-outline-variant rounded-lg font-body-md gold-border-focus outline-none" 
-                    type="datetime-local"
+                    className="w-full rounded-lg border-outline-variant focus:border-gold-accent focus:ring-1 focus:ring-gold-accent p-2.5 text-body-md" 
+                    type="date"
                   />
                 </div>
 
                 {status === 'success' && (
-                  <div className="p-3 bg-green-100 text-green-800 rounded-lg text-body-md font-semibold">
-                    Your quotation enquiry has been sent successfully! We will contact you shortly.
+                  <div className="p-3 bg-green-50 border border-green-200 text-green-800 rounded-lg font-bold">
+                    Quotation request submitted! We will contact you on WhatsApp/Call within 24 hours.
                   </div>
                 )}
 
                 {status === 'error' && (
-                  <div className="p-3 bg-red-50 text-red-600 rounded-lg text-body-md font-semibold">
-                    Error sending request. Please check your network and try again.
+                  <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg font-bold">
+                    Failed to submit request. Please check connections and try again.
                   </div>
                 )}
 
-                <div className="pt-4">
+                <div className="pt-2">
                   <button 
                     disabled={loading}
-                    className="w-full py-4 bg-primary text-on-primary font-title-lg text-title-lg rounded-lg shadow-lg hover:bg-opacity-90 hover:shadow-xl transform active:scale-95 transition-all flex items-center justify-center gap-2 group" 
+                    className="w-full bg-primary hover:bg-primary-container text-white py-4 rounded-lg font-bold text-xs shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-1.5" 
                     type="submit"
                   >
                     {loading ? (
-                      <span className="material-symbols-outlined text-[18px] animate-spin">sync</span>
+                      <span className="material-symbols-outlined text-[16px] animate-spin">sync</span>
                     ) : (
                       <>
-                        Book My Slot / Send Enquiry
-                        <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">send</span>
+                        Submit RFQ Quote Request
+                        <span className="material-symbols-outlined text-[18px]">send</span>
                       </>
                     )}
                   </button>
                 </div>
-
-                <p className="text-center font-body-md text-body-md text-on-surface-variant italic mt-4">
-                  "We'll contact you within 24 hours on WhatsApp or Call"
-                </p>
               </form>
             </div>
           </div>
@@ -256,7 +269,7 @@ const EnquiryForm = () => {
       </main>
 
       <Footer />
-    </>
+    </div>
   );
 };
 

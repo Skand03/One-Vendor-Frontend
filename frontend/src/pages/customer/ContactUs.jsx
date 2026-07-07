@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { setMetaTags } from '../../utils/seo';
-import { supabase } from '../../services/supabaseClient';
+import api from '../../services/api';
 
 const ContactUs = () => {
   const [formData, setFormData] = useState({
@@ -34,18 +35,8 @@ const ContactUs = () => {
     setStatus('');
 
     try {
-      const { error } = await supabase.from('contact_messages').insert([
-        {
-          full_name: formData.fullName,
-          email: formData.email,
-          phone: formData.phone,
-          subject: formData.subject,
-          message: formData.message
-        }
-      ]);
-
-      if (error) throw error;
-
+      // POST directly to Spring Boot REST API
+      await api.post('/contact', formData);
       setStatus('success');
       setFormData({
         fullName: '',
@@ -62,196 +53,228 @@ const ContactUs = () => {
     }
   };
 
+  // Animation variants
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 35 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } }
+  };
+
   return (
-    <>
+    <div className="min-h-screen bg-surface font-body-md text-on-surface">
       <Navbar />
 
-      <main className="flex-grow pt-32 pb-xl px-md md:px-lg">
-        <div className="max-w-container-max mx-auto">
-          <div className="mb-xl text-center md:text-left">
-            <h1 className="font-display-lg text-display-lg text-primary mb-xs">Get in Touch</h1>
-            <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
-              Our procurement specialists are ready to assist your organization with tailored inventory solutions. Reach out via the form or contact details below.
-            </p>
-            <div className="w-24 h-1 bg-secondary mt-md rounded-full mx-auto md:mx-0"></div>
-          </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-xl items-start">
-            <div className="lg:col-span-5 space-y-md">
-              <div className="space-y-base">
-                <h2 className="font-headline-md text-headline-md text-primary mb-sm">Contact Information</h2>
+      <main className="flex-grow pt-32 pb-xl px-gutter max-w-container-max mx-auto">
+        {/* Header */}
+        <div className="mb-xl text-center md:text-left space-y-4">
+          <motion.h1 
+            initial={{ opacity: 0, y: -15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="font-poppins font-extrabold text-4xl text-primary"
+          >
+            Get in Touch
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl"
+          >
+            Our procurement specialists are ready to assist your organization with tailored inventory and design solutions. Reach out via the form or contact details below.
+          </motion.p>
+          <div className="w-24 h-1 bg-gold-accent mt-md rounded-full mx-auto md:mx-0"></div>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+          {/* Left Info Side */}
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeInUp}
+            className="lg:col-span-5 space-y-8"
+          >
+            <div className="space-y-6">
+              <h2 className="font-poppins font-bold text-xl text-primary">Contact Information</h2>
 
-                <div className="space-y-sm">
-                  <div className="flex items-start gap-sm group">
-                    <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary group-hover:bg-secondary group-hover:text-on-secondary transition-colors">
-                      <span className="material-symbols-outlined">location_on</span>
-                    </div>
-                    <div>
-                      <p className="font-label-md text-label-md text-secondary uppercase tracking-wider">Address</p>
-                      <p className="font-body-lg text-body-lg text-on-surface">Gorakhpur, Uttar Pradesh, India</p>
-                    </div>
+              <div className="space-y-4">
+                <div className="flex items-start gap-4 group">
+                  <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-gold-accent transition-colors">
+                    <span className="material-symbols-outlined text-[20px]">location_on</span>
                   </div>
-                  
-                  <div className="flex items-start gap-sm group">
-                    <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary group-hover:bg-secondary group-hover:text-on-secondary transition-colors">
-                      <span className="material-symbols-outlined">call</span>
-                    </div>
-                    <div>
-                      <p className="font-label-md text-label-md text-secondary uppercase tracking-wider">Phone</p>
-                      <p className="font-body-lg text-body-lg text-on-surface">+91 85760 84127</p>
-                    </div>
+                  <div>
+                    <p className="font-label-md text-label-md text-gold-accent uppercase tracking-wider text-[11px] font-bold">Address</p>
+                    <p className="text-on-surface text-xs mt-0.5">Gorakhpur, Uttar Pradesh, India</p>
                   </div>
-                  
-                  <div className="flex items-start gap-sm group">
-                    <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary group-hover:bg-secondary group-hover:text-on-secondary transition-colors">
-                      <span className="material-symbols-outlined">mail</span>
-                    </div>
-                    <div>
-                      <p className="font-label-md text-label-md text-secondary uppercase tracking-wider">Email</p>
-                      <p className="font-body-lg text-body-lg text-on-surface">onevendorsolutions@gmail.com</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-sm group">
-                    <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary group-hover:bg-secondary group-hover:text-on-secondary transition-colors">
-                      <span className="material-symbols-outlined">schedule</span>
-                    </div>
-                    <div>
-                      <p className="font-label-md text-label-md text-secondary uppercase tracking-wider">Business Hours</p>
-                      <p className="font-body-lg text-body-lg text-on-surface">Mon-Fri: 9 AM - 6 PM</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-lg">
-                <div className="relative w-full h-[300px] rounded-lg overflow-hidden premium-shadow group">
-                  <div 
-                    className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" 
-                    style={{backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBAhccbLOXogwe9TC0oa7exBuLvZ0lT4EQi4HrOT7Ku_Xpp-zKWq0xgNKoXtgCJxNuRFeDJj-AEYIdde5eLYOKTeS5Y2RCbeyVjcJs6-rOQT8CJUkVWYcEgXh39lKLxWZ3o9ToCLhi_wdbDzDdKj16ps8n5aFgV5K40SXailGJ4NrntVn2KyH3BUF6SX7W8VL5O6WT_JxX6r3PEpADaR7Eb27DMK0Y-VMJOXwGmDO6zGlUXpzr3hzQDQKF5i-Gq24R7EsPrfwD3Bys')"}}
-                  ></div>
-                  <div className="absolute inset-0 bg-primary/10 group-hover:bg-transparent transition-colors duration-300"></div>
-                  <div className="absolute bottom-md left-md">
-                    <a className="inline-flex items-center gap-xs bg-on-primary text-primary px-md py-sm rounded-lg font-label-md text-label-md premium-shadow hover:bg-secondary hover:text-on-secondary transition-all active:scale-95" href="https://maps.google.com" target="_blank" rel="noreferrer">
-                      <span className="material-symbols-outlined text-[18px]">open_in_new</span>
-                      View on Google Maps
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="lg:col-span-7">
-              <div className="bg-on-primary p-md md:p-xl rounded-lg premium-shadow border-t-[6px] border-secondary relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-lg opacity-[0.03] pointer-events-none">
-                  <span className="material-symbols-outlined text-[120px] text-primary">contact_support</span>
                 </div>
                 
-                <form className="space-y-md relative z-10" onSubmit={handleSubmit}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
-                    <div className="space-y-xs">
-                      <label className="font-label-md text-label-md text-on-surface-variant block">Full Name</label>
-                      <input 
-                        name="fullName"
-                        value={formData.fullName}
-                        onChange={handleChange}
-                        className="w-full px-md py-sm border border-outline-variant rounded-lg focus:ring-0 focus:border-secondary focus:outline-none transition-colors bg-surface-container-lowest" 
-                        placeholder="John Doe" 
-                        required 
-                        type="text"
-                      />
-                    </div>
-                    <div className="space-y-xs">
-                      <label className="font-label-md text-label-md text-on-surface-variant block">Email Address</label>
-                      <input 
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="w-full px-md py-sm border border-outline-variant rounded-lg focus:ring-0 focus:border-secondary focus:outline-none transition-colors bg-surface-container-lowest" 
-                        placeholder="john@company.com" 
-                        required 
-                        type="email"
-                      />
-                    </div>
+                <div className="flex items-start gap-4 group">
+                  <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-gold-accent transition-colors">
+                    <span className="material-symbols-outlined text-[20px]">call</span>
                   </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
-                    <div className="space-y-xs">
-                      <label className="font-label-md text-label-md text-on-surface-variant block">Phone Number</label>
-                      <input 
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        className="w-full px-md py-sm border border-outline-variant rounded-lg focus:ring-0 focus:border-secondary focus:outline-none transition-colors bg-surface-container-lowest" 
-                        placeholder="+91 85760 84127" 
-                        type="tel"
-                      />
-                    </div>
-                    <div className="space-y-xs">
-                      <label className="font-label-md text-label-md text-on-surface-variant block">Subject</label>
-                      <select 
-                        name="subject"
-                        value={formData.subject}
-                        onChange={handleChange}
-                        className="w-full px-md py-sm border border-outline-variant rounded-lg focus:ring-0 focus:border-secondary focus:outline-none transition-colors bg-surface-container-lowest" 
-                        required
-                      >
-                        <option value="">Select a subject</option>
-                        <option value="quote">Request a Quote</option>
-                        <option value="partnership">B2B Partnership</option>
-                        <option value="support">Technical Support</option>
-                        <option value="billing">Billing Inquiry</option>
-                        <option value="other">Other</option>
-                      </select>
-                    </div>
+                  <div>
+                    <p className="font-label-md text-label-md text-gold-accent uppercase tracking-wider text-[11px] font-bold">Phone</p>
+                    <p className="text-on-surface text-xs mt-0.5">+91 85760 84127</p>
                   </div>
-                  
-                  <div className="space-y-xs">
-                    <label className="font-label-md text-label-md text-on-surface-variant block">Message</label>
-                    <textarea 
-                      name="message"
-                      value={formData.message}
-                      onChange={handleChange}
-                      className="w-full px-md py-sm border border-outline-variant rounded-lg focus:ring-0 focus:border-secondary focus:outline-none transition-colors bg-surface-container-lowest" 
-                      placeholder="How can we help your organization today?" 
-                      required 
-                      rows="5"
-                    ></textarea>
+                </div>
+                
+                <div className="flex items-start gap-4 group">
+                  <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-gold-accent transition-colors">
+                    <span className="material-symbols-outlined text-[20px]">mail</span>
                   </div>
+                  <div>
+                    <p className="font-label-md text-label-md text-gold-accent uppercase tracking-wider text-[11px] font-bold">Email</p>
+                    <p className="text-on-surface text-xs mt-0.5">onevendorsolutions@gmail.com</p>
+                  </div>
+                </div>
 
-                  {status === 'success' && (
-                    <div className="p-3 bg-green-100 text-green-800 rounded-lg text-body-md font-semibold">
-                      Your message has been sent successfully! We will contact you soon.
-                    </div>
-                  )}
-
-                  {status === 'error' && (
-                    <div className="p-3 bg-red-50 text-red-600 rounded-lg text-body-md font-semibold">
-                      Error sending message. Please try again.
-                    </div>
-                  )}
-                  
-                  <button 
-                    disabled={loading}
-                    className="w-full md:w-auto bg-secondary-container text-on-secondary-fixed font-bold font-label-md text-label-md py-sm px-xl rounded-lg premium-shadow hover:bg-secondary hover:text-on-secondary transition-all active:scale-[0.98] gold-border-gradient uppercase tracking-widest flex items-center justify-center gap-sm" 
-                    type="submit"
-                  >
-                    {loading ? (
-                      <span className="material-symbols-outlined text-[18px] animate-spin">sync</span>
-                    ) : (
-                      <span className="material-symbols-outlined text-[18px]">send</span>
-                    )}
-                    {loading ? 'Sending...' : 'Send Message'}
-                  </button>
-                </form>
+                <div className="flex items-start gap-4 group">
+                  <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-gold-accent transition-colors">
+                    <span className="material-symbols-outlined text-[20px]">schedule</span>
+                  </div>
+                  <div>
+                    <p className="font-label-md text-label-md text-gold-accent uppercase tracking-wider text-[11px] font-bold">Business Hours</p>
+                    <p className="text-on-surface text-xs mt-0.5">Mon-Sat: 9 AM - 6 PM</p>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+
+            <div className="rounded-2xl overflow-hidden shadow-lg border border-outline-variant/20 h-[300px]">
+              <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14241.970221379768!2d83.37311107567083!3d26.76029881881678!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39914470876bb2d3%3A0xc3cf338dc9944de3!2sGorakhpur%2C%20Uttar%20Pradesh!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin" 
+                width="100%" 
+                height="100%" 
+                style={{ border: 0 }} 
+                allowFullScreen="" 
+                loading="lazy" 
+                title="Office Location Map"
+              ></iframe>
+            </div>
+          </motion.div>
+
+          {/* Right Form Side */}
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeInUp}
+            className="lg:col-span-7"
+          >
+            <div className="bg-white p-8 rounded-2xl shadow-xl border-t-4 border-gold-accent relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none">
+                <span className="material-symbols-outlined text-[120px] text-primary">contact_support</span>
+              </div>
+              
+              <form className="space-y-6 relative z-10" onSubmit={handleSubmit}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="font-label-md text-label-md text-on-surface-variant block mb-1">Full Name</label>
+                    <input 
+                      name="fullName"
+                      value={formData.fullName}
+                      onChange={handleChange}
+                      className="w-full rounded-lg border-outline-variant focus:border-gold-accent focus:ring-1 focus:ring-gold-accent p-3 text-body-md" 
+                      placeholder="John Doe" 
+                      required 
+                      type="text"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-label-md text-label-md text-on-surface-variant block mb-1">Email Address</label>
+                    <input 
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className="w-full rounded-lg border-outline-variant focus:border-gold-accent focus:ring-1 focus:ring-gold-accent p-3 text-body-md" 
+                      placeholder="john@company.com" 
+                      required 
+                      type="email"
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="font-label-md text-label-md text-on-surface-variant block mb-1">Phone Number</label>
+                    <input 
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      className="w-full rounded-lg border-outline-variant focus:border-gold-accent focus:ring-1 focus:ring-gold-accent p-3 text-body-md" 
+                      placeholder="+91 85760 84127" 
+                      type="tel"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-label-md text-label-md text-on-surface-variant block mb-1">Subject</label>
+                    <select 
+                      name="subject"
+                      value={formData.subject}
+                      onChange={handleChange}
+                      className="w-full rounded-lg border-outline-variant focus:border-gold-accent focus:ring-1 focus:ring-gold-accent p-3 text-body-md" 
+                      required
+                    >
+                      <option value="">Select a subject</option>
+                      <option value="quote">Request a Quote</option>
+                      <option value="partnership">B2B Partnership</option>
+                      <option value="support">Technical Support</option>
+                      <option value="billing">Billing Inquiry</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="font-label-md text-label-md text-on-surface-variant block mb-1">Message</label>
+                  <textarea 
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    className="w-full rounded-lg border-outline-variant focus:border-gold-accent focus:ring-1 focus:ring-gold-accent p-3 text-body-md" 
+                    placeholder="How can we help your organization today?" 
+                    required 
+                    rows="4"
+                  ></textarea>
+                </div>
+
+                {status === 'success' && (
+                  <div className="p-4 bg-green-50 border border-green-200 text-green-800 rounded-xl text-xs font-semibold animate-fadeIn">
+                    Your message has been sent successfully! Our team will contact you soon.
+                  </div>
+                )}
+
+                {status === 'error' && (
+                  <div className="p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs font-semibold animate-fadeIn">
+                    Error sending message. Please try again.
+                  </div>
+                )}
+                
+                <button 
+                  disabled={loading}
+                  className="w-full bg-gold-accent hover:bg-[#c5a02e] text-primary font-bold py-4 rounded-lg shadow-lg transition-all transform active:scale-[0.98] flex items-center justify-center gap-2" 
+                  type="submit"
+                >
+                  {loading ? (
+                    <>
+                      <span className="material-symbols-outlined animate-spin text-[18px]">sync</span>
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-[18px]">send</span>
+                      Send Message
+                    </>
+                  )}
+                </button>
+              </form>
+            </div>
+          </motion.div>
         </div>
       </main>
 
       <Footer />
-    </>
+    </div>
   );
 };
 
