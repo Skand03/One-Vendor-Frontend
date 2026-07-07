@@ -155,9 +155,9 @@ const AboutUs = () => {
               >
                 <div className="aspect-square rounded-2xl overflow-hidden shadow-2xl border-b-4 border-gold-accent max-w-md mx-auto">
                   <img 
-                    className="w-full h-full object-cover" 
+                    className="w-full h-full object-contain" 
                     alt="Ujjwal Pandey, CEO & Founder of One Vendor Solutions" 
-                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fit=crop&w=600&h=600" 
+                    src="/all-images/Onevendorsolutions/CEO.jpeg" 
                   />
                 </div>
                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-auto md:right-8 bg-primary p-4 rounded-xl text-white shadow-2xl border-l-4 border-gold-accent hidden md:block">

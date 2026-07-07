@@ -7,16 +7,7 @@ const WhatsAppChatbot = () => {
     return null;
   }
 
-  const rawMessage = `Hi🙋🏻‍♂️
-Thankyou for showing your interest in *OVS* this is 
-*CEO & FOUNDER*
-*Ujjwal Pandey*
-
-*One Vendor Solutions*
-
-Contact:- *8576084127*
-
-*Email*:- onevendorsolutions@gmail.com`;
+  const rawMessage = `Hello Ujjwal`;
 
   const whatsappUrl = `https://wa.me/918576084127?text=${encodeURIComponent(rawMessage)}`;
 
@@ -62,15 +53,7 @@ Contact:- *8576084127*
                 <img src="/logo.jpg" alt="OVS Logo" className="w-full h-full object-cover" />
               </div>
               <div className="bg-white text-on-surface p-3 rounded-lg rounded-tl-none shadow-sm text-xs leading-relaxed space-y-1">
-                <p className="font-semibold text-primary">Hi 🙋🏻‍♂️</p>
-                <p>Thank you for showing your interest in <strong>OVS</strong>! This is:</p>
-                <p className="font-bold text-secondary-fixed-dim">CEO & FOUNDER</p>
-                <p className="font-bold text-primary">Ujjwal Pandey</p>
-                <div className="pt-2 border-t border-outline-variant/30 mt-2 text-[11px] space-y-0.5">
-                  <p><strong>One Vendor Solutions</strong></p>
-                  <p>Contact: <strong>+91 85760 84127</strong></p>
-                  <p>Email: <strong>onevendorsolutions@gmail.com</strong></p>
-                </div>
+                <p className="font-semibold text-primary">Hello</p>
               </div>
             </div>
           </div>

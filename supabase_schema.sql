@@ -70,6 +70,7 @@ CREATE TABLE IF NOT EXISTS website_settings (
     phone text,
     address text,
     whatsapp_number text,
+    instagram_url text,
     about_text text,
     logo_url text
 );
@@ -222,8 +223,8 @@ INSERT INTO testimonials (name, position, company, content, rating, image_url) V
 ('Rajesh Iyer', 'Co-owner', 'Iyer Coaching Academy', 'Great furniture, projector screens, and CCTV setup for our new coaching center branch. Outstanding bulk discounts and fast execution.', 4, 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?fit=crop&w=150&h=150');
 
 -- Seed Website Settings
-INSERT INTO website_settings (id, company_name, email, phone, address, whatsapp_number, about_text, logo_url) VALUES
-(1, 'One Vendor Solutions', 'onevendorsolutions@gmail.com', '+91 85760 84127', '123 Corporate Blvd, Business District, Delhi, India', '918576084127', 'Experience unified B2B procurement designed for excellence. We simplify your supply chain by providing premium quality essentials for educational institutions, corporate spaces, and residential complexes—all under one reliable roof.', '/logo.jpg')
+INSERT INTO website_settings (id, company_name, email, phone, address, whatsapp_number, instagram_url, about_text, logo_url) VALUES
+(1, 'One Vendor Solutions', 'onevendorsolutions@gmail.com', '+91 85760 84127', 'Near water sport complex gorakhpur, Uttar Pradesh, India', '918576084127', 'https://www.instagram.com/onevendor.solutions?igsh=dDNoMWw1eHhxdHRn', 'Experience unified B2B procurement designed for excellence. We simplify your supply chain by providing premium quality essentials for educational institutions, corporate spaces, and residential complexes—all under one reliable roof.', '/logo.jpg')
 ON CONFLICT (id) DO NOTHING;
 
 
@@ -271,3 +272,72 @@ CREATE POLICY "Allow public services" ON services FOR ALL USING (true) WITH CHEC
 -- Fix contact_messages: add status column if it doesn't exist yet
 ALTER TABLE contact_messages ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'UNREAD';
 
+-- ==========================================================
+-- PHASE 2 & 3: PRODUCTION SECURITY (RLS) & STORAGE BUCKETS
+-- ==========================================================
+
+-- 1. Create Storage Buckets
+INSERT INTO storage.buckets (id, name, public) VALUES 
+('gallery', 'gallery', true),
+('services', 'services', true),
+('categories', 'categories', true),
+('projects', 'projects', true),
+('testimonials', 'testimonials', true),
+('logo', 'logo', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- 2. Storage Bucket Policies (Public Read, Admin Write)
+CREATE POLICY "Public Read All Buckets" 
+ON storage.objects FOR SELECT 
+TO public 
+USING (bucket_id IN ('gallery', 'services', 'categories', 'projects', 'testimonials', 'logo'));
+
+CREATE POLICY "Admin Write All Buckets" 
+ON storage.objects FOR INSERT 
+TO authenticated 
+WITH CHECK (bucket_id IN ('gallery', 'services', 'categories', 'projects', 'testimonials', 'logo'));
+
+CREATE POLICY "Admin Update All Buckets" 
+ON storage.objects FOR UPDATE 
+TO authenticated 
+USING (bucket_id IN ('gallery', 'services', 'categories', 'projects', 'testimonials', 'logo'));
+
+CREATE POLICY "Admin Delete All Buckets" 
+ON storage.objects FOR DELETE 
+TO authenticated 
+USING (bucket_id IN ('gallery', 'services', 'categories', 'projects', 'testimonials', 'logo'));
+
+-- 3. Enforce Strict Table RLS
+-- First, enable RLS on all tables
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE services ENABLE ROW LEVEL SECURITY;
+ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
+ALTER TABLE gallery ENABLE ROW LEVEL SECURITY;
+ALTER TABLE testimonials ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE contact_messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE website_settings ENABLE ROW LEVEL SECURITY;
+
+-- 4. Public Table Policies (Read Only)
+CREATE POLICY "Public Read Categories" ON categories FOR SELECT TO public USING (true);
+CREATE POLICY "Public Read Services" ON services FOR SELECT TO public USING (true);
+CREATE POLICY "Public Read Projects" ON projects FOR SELECT TO public USING (true);
+CREATE POLICY "Public Read Gallery" ON gallery FOR SELECT TO public USING (true);
+CREATE POLICY "Public Read Testimonials" ON testimonials FOR SELECT TO public USING (true);
+CREATE POLICY "Public Read Settings" ON website_settings FOR SELECT TO public USING (true);
+
+-- 5. Public Table Policies (Insert Only)
+CREATE POLICY "Public Insert Bookings" ON bookings FOR INSERT TO public WITH CHECK (true);
+CREATE POLICY "Public Insert Contact Messages" ON contact_messages FOR INSERT TO public WITH CHECK (true);
+
+-- 6. Admin Table Policies (Full Access to Authenticated Users)
+-- (Note: In a true prod app, we'd check for a specific admin role, but for this app, 
+--  any user successfully signed into Supabase Auth via Admin Panel is considered Admin)
+CREATE POLICY "Admin Full Access Categories" ON categories FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin Full Access Services" ON services FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin Full Access Projects" ON projects FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin Full Access Gallery" ON gallery FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin Full Access Testimonials" ON testimonials FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin Full Access Bookings" ON bookings FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin Full Access Contact Messages" ON contact_messages FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin Full Access Settings" ON website_settings FOR ALL TO authenticated USING (true) WITH CHECK (true);

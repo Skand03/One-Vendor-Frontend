@@ -9,6 +9,7 @@ const Settings = () => {
     phone: '',
     address: '',
     whatsappNumber: '',
+    instagramUrl: '',
     aboutText: '',
     logoUrl: ''
   });
@@ -29,6 +30,7 @@ const Settings = () => {
             phone: res.data.phone || '',
             address: res.data.address || '',
             whatsappNumber: res.data.whatsappNumber || '',
+            instagramUrl: res.data.instagramUrl || '',
             aboutText: res.data.aboutText || '',
             logoUrl: res.data.logoUrl || ''
           });
@@ -52,11 +54,14 @@ const Settings = () => {
     setSaving(true);
     setStatus('');
     try {
+      console.log('Saving settings payload:', formData);
       await adminApi.put('/settings', formData);
       setStatus('success');
       setTimeout(() => setStatus(''), 4000);
     } catch (err) {
       console.error('Error saving settings:', err);
+      console.error('Error details:', err.message, err.stack);
+      alert('Error saving settings: ' + (err.message || 'Unknown error'));
       setStatus('error');
     } finally {
       setSaving(false);
@@ -136,6 +141,16 @@ const Settings = () => {
                     />
                   </div>
                 </div>
+                <div>
+                  <label className="font-label-md text-[10px] text-on-surface-variant font-bold uppercase block mb-1">Instagram Profile URL</label>
+                  <input 
+                    type="url"
+                    name="instagramUrl"
+                    value={formData.instagramUrl}
+                    onChange={handleChange}
+                    className="w-full rounded-lg border-outline-variant focus:border-gold-accent focus:ring-1 focus:ring-gold-accent p-3 text-body-md"
+                  />
+                </div>
 
                 <div>
                   <label className="font-label-md text-[10px] text-on-surface-variant font-bold uppercase block mb-1">Company Address</label>
@@ -167,7 +182,7 @@ const Settings = () => {
                         onChange={async (e) => {
                           if (e.target.files && e.target.files[0]) {
                             try {
-                              const res = await uploadImage(e.target.files[0]);
+                              const res = await uploadImage(e.target.files[0], 'images');
                               setFormData({...formData, logoUrl: res.url});
                             } catch(err) {
                               alert('Upload failed: ' + err.message);

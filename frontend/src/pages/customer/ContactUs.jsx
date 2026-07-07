@@ -104,7 +104,7 @@ const ContactUs = () => {
                   </div>
                   <div>
                     <p className="font-label-md text-label-md text-gold-accent uppercase tracking-wider text-[11px] font-bold">Address</p>
-                    <p className="text-on-surface text-xs mt-0.5">Gorakhpur, Uttar Pradesh, India</p>
+                    <p className="text-on-surface text-xs mt-0.5">Near water sport complex gorakhpur, Uttar Pradesh, India</p>
                   </div>
                 </div>
                 

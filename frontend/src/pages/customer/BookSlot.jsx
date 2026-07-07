@@ -329,7 +329,7 @@ const BookSlot = () => {
               <h5 className="font-poppins font-bold text-primary text-sm">Need Direct Sourcing?</h5>
               <p className="text-xs text-on-surface-variant leading-relaxed">Rather speak directly to our founder? Tap below to start a WhatsApp dialogue immediately.</p>
               <a 
-                href="https://wa.me/918576084127?text=Hello%20One%20Vendor%20Solutions,%20I%20need%20your%20service." 
+                href="https://wa.me/918576084127?text=Hello%20Ujjwal" 
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex w-full items-center justify-center gap-2 bg-[#25D366] text-white py-3 rounded-lg font-bold text-xs hover:bg-[#20ba5a] transition-all shadow"

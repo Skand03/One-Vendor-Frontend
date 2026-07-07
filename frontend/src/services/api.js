@@ -109,8 +109,9 @@ export const api = {
           companyName: 'One Vendor Solutions',
           email: 'onevendorsolutions@gmail.com',
           phone: '+91 85760 84127',
-          address: '123 Corporate Blvd, Business District, Delhi, India',
+          address: 'Near water sport complex gorakhpur, Uttar Pradesh, India',
           whatsappNumber: '918576084127',
+          instagramUrl: 'https://www.instagram.com/onevendor.solutions?igsh=dDNoMWw1eHhxdHRn',
           aboutText: 'Experience unified B2B procurement designed for excellence. We simplify your supply chain by providing premium quality essentials for educational institutions, corporate spaces, and residential complexes—all under one reliable roof.',
           logoUrl: '/logo.jpg'
         });
@@ -121,6 +122,7 @@ export const api = {
         phone: data.phone,
         address: data.address,
         whatsappNumber: data.whatsapp_number,
+        instagramUrl: data.instagram_url,
         aboutText: data.about_text,
         logoUrl: data.logo_url
       };
@@ -272,6 +274,45 @@ export const adminApi = {
       return wrapResponse(data);
     }
 
+    // 2. /projects
+    if (url === '/projects') {
+      const { data, error } = await supabase.from('projects').insert({
+        name: payload.name,
+        client_name: payload.clientName,
+        description: payload.description,
+        completion_date: payload.completionDate,
+        image_url: payload.imageUrl,
+        category_id: payload.categoryId
+      }).select().single();
+      if (error) throw error;
+      return wrapResponse(data);
+    }
+
+    // 3. /gallery
+    if (url === '/gallery') {
+      const { data, error } = await supabase.from('gallery').insert({
+        title: payload.title,
+        image_url: payload.imageUrl,
+        category_id: payload.categoryId
+      }).select().single();
+      if (error) throw error;
+      return wrapResponse(data);
+    }
+
+    // 4. /testimonials
+    if (url === '/testimonials') {
+      const { data, error } = await supabase.from('testimonials').insert({
+        name: payload.name,
+        position: payload.position,
+        company: payload.company,
+        content: payload.content,
+        rating: payload.rating,
+        image_url: payload.imageUrl
+      }).select().single();
+      if (error) throw error;
+      return wrapResponse(data);
+    }
+
     throw new Error(`Endpoint POST admin ${url} not implemented`);
   },
 
@@ -286,6 +327,7 @@ export const adminApi = {
         phone: payload.phone,
         address: payload.address,
         whatsapp_number: payload.whatsappNumber,
+        instagram_url: payload.instagramUrl,
         about_text: payload.aboutText,
         logo_url: payload.logoUrl
       }).select().single();
@@ -308,7 +350,49 @@ export const adminApi = {
       return wrapResponse(data);
     }
 
-    // 3. /bookings/:id/status
+    // 3. /projects/:id
+    if (url.startsWith('/projects/')) {
+      const id = url.split('/').pop();
+      const { data, error } = await supabase.from('projects').update({
+        name: payload.name,
+        client_name: payload.clientName,
+        description: payload.description,
+        completion_date: payload.completionDate,
+        image_url: payload.imageUrl,
+        category_id: payload.categoryId
+      }).eq('id', id).select().single();
+      if (error) throw error;
+      return wrapResponse(data);
+    }
+
+    // 4. /gallery/:id
+    if (url.startsWith('/gallery/')) {
+      const id = url.split('/').pop();
+      const { data, error } = await supabase.from('gallery').update({
+        title: payload.title,
+        image_url: payload.imageUrl,
+        category_id: payload.categoryId
+      }).eq('id', id).select().single();
+      if (error) throw error;
+      return wrapResponse(data);
+    }
+
+    // 5. /testimonials/:id
+    if (url.startsWith('/testimonials/')) {
+      const id = url.split('/').pop();
+      const { data, error } = await supabase.from('testimonials').update({
+        name: payload.name,
+        position: payload.position,
+        company: payload.company,
+        content: payload.content,
+        rating: payload.rating,
+        image_url: payload.imageUrl
+      }).eq('id', id).select().single();
+      if (error) throw error;
+      return wrapResponse(data);
+    }
+
+    // 6. /bookings/:id/status
     if (url.startsWith('/bookings/') && url.endsWith('/status')) {
       const id = url.split('/')[2];
       const { data, error } = await supabase.from('bookings').update({
@@ -318,7 +402,7 @@ export const adminApi = {
       return wrapResponse(data);
     }
 
-    // 4. /contact-messages/:id/status
+    // 7. /contact-messages/:id/status
     if (url.startsWith('/contact-messages/') && url.endsWith('/status')) {
       const id = url.split('/')[2];
       const { data, error } = await supabase.from('contact_messages').update({
@@ -340,7 +424,31 @@ export const adminApi = {
       return wrapResponse({ message: 'Deleted successfully' });
     }
 
-    // 2. /bookings/:id
+    // 2. /projects/:id
+    if (url.startsWith('/projects/')) {
+      const id = url.split('/').pop();
+      const { error } = await supabase.from('projects').delete().eq('id', id);
+      if (error) throw error;
+      return wrapResponse({ message: 'Deleted successfully' });
+    }
+
+    // 3. /gallery/:id
+    if (url.startsWith('/gallery/')) {
+      const id = url.split('/').pop();
+      const { error } = await supabase.from('gallery').delete().eq('id', id);
+      if (error) throw error;
+      return wrapResponse({ message: 'Deleted successfully' });
+    }
+
+    // 4. /testimonials/:id
+    if (url.startsWith('/testimonials/')) {
+      const id = url.split('/').pop();
+      const { error } = await supabase.from('testimonials').delete().eq('id', id);
+      if (error) throw error;
+      return wrapResponse({ message: 'Deleted successfully' });
+    }
+
+    // 5. /bookings/:id
     if (url.startsWith('/bookings/')) {
       const id = url.split('/').pop();
       const { error } = await supabase.from('bookings').delete().eq('id', id);
@@ -348,7 +456,7 @@ export const adminApi = {
       return wrapResponse({ message: 'Deleted successfully' });
     }
 
-    // 3. /contact-messages/:id
+    // 6. /contact-messages/:id
     if (url.startsWith('/contact-messages/')) {
       const id = url.split('/').pop();
       const { error } = await supabase.from('contact_messages').delete().eq('id', id);
@@ -360,33 +468,45 @@ export const adminApi = {
   }
 };
 
-export const uploadImage = async (file) => {
+export const uploadImage = async (file, bucketName = 'images') => {
   try {
+    console.log('Attempting upload to bucket:', bucketName);
     const fileExt = file.name.split('.').pop();
     const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
     const filePath = `${fileName}`;
 
-    // Upload to 'images' bucket
     const { data, error } = await supabase.storage
-      .from('images')
+      .from(bucketName)
       .upload(filePath, file, {
         cacheControl: '3600',
         upsert: false
       });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Full upload error details:', error);
+      throw error;
+    }
 
     const { data: { publicUrl } } = supabase.storage
-      .from('images')
+      .from(bucketName)
       .getPublicUrl(filePath);
 
+    console.log('Upload successful, public URL:', publicUrl);
     return { url: publicUrl };
   } catch (err) {
     console.error('Supabase storage upload failed:', err);
-    if (err.statusCode === 403 || err.message.includes('403')) {
-      throw new Error('Upload failed: Permission denied (403). Please ensure the "images" bucket exists in Supabase Storage and has a public INSERT policy.');
+    
+    let errorMessage = 'Upload failed. Check console for details.';
+    
+    if (err.statusCode === 403 || err.message?.includes('403')) {
+      errorMessage = `Permission denied (403). Check bucket policies for "${bucketName}".`;
+    } else if (err.message?.includes('Bucket not found')) {
+      errorMessage = `Bucket "${bucketName}" not found. Check bucket name in Supabase (case-sensitive!).`;
+    } else if (err.message) {
+      errorMessage = err.message;
     }
-    throw err;
+    
+    throw new Error(errorMessage);
   }
 };
 

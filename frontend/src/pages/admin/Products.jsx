@@ -328,15 +328,15 @@ const Products = () => {
                           className="hidden"
                           accept="image/*"
                           onChange={async (e) => {
-                            if (e.target.files && e.target.files[0]) {
-                              try {
-                                const res = await uploadImage(e.target.files[0]);
-                                setFormData({...formData, imageUrl: res.url});
-                              } catch(err) {
-                                alert('Upload failed: ' + err.message);
-                              }
+                          if (e.target.files && e.target.files[0]) {
+                            try {
+                              const res = await uploadImage(e.target.files[0], 'images');
+                              setFormData({...formData, imageUrl: res.url});
+                            } catch(err) {
+                              alert('Upload failed: ' + err.message);
                             }
-                          }}
+                          }
+                        }}
                         />
                         Upload File
                       </label>

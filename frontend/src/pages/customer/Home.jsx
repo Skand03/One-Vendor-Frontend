@@ -153,25 +153,7 @@ const Home = () => {
               Experience premium, unified B2B procurement tailored for modern institutions and enterprises. We consolidate your supply chain by delivering high-grade furniture, interiors, technology setups, and essential services under one reliable brand.
             </motion.p>
             
-            <motion.div 
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.6 }}
-              className="flex flex-wrap items-center gap-6 pt-4"
-            >
-              <div className="flex -space-x-3">
-                <div className="w-12 h-12 rounded-full border-2 border-primary bg-gold-accent text-primary flex items-center justify-center font-bold">
-                  <span className="material-symbols-outlined text-[20px]">school</span>
-                </div>
-                <div className="w-12 h-12 rounded-full border-2 border-primary bg-[#1C3AAC] text-white flex items-center justify-center font-bold">
-                  <span className="material-symbols-outlined text-[20px]">business_center</span>
-                </div>
-                <div className="w-12 h-12 rounded-full border-2 border-primary bg-[#e1e2e4] text-[#191c1e] flex items-center justify-center font-bold">
-                  <span className="material-symbols-outlined text-[20px]">home</span>
-                </div>
-              </div>
-              <span className="text-sm font-semibold text-surface-variant">Trusted by 500+ Top Institutions &amp; Corporates</span>
-            </motion.div>
+
           </div>
 
           {/* Hero Right Quick Enquiry Form */}
@@ -297,9 +279,9 @@ const Home = () => {
           >
             <div className="rounded-2xl overflow-hidden shadow-2xl border-b-4 border-gold-accent">
               <img 
-                src="/all-images/school/office-essential.png" 
-                alt="Premium corporate office designed by OVS" 
-                className="w-full h-[360px] object-cover hover:scale-105 transition-transform duration-500" 
+                src="/all-images/Onevendorsolutions/home-page-broucher.png" 
+                alt="One Vendor Solutions - Premium B2B Procurement Brochure" 
+                className="w-full h-auto max-h-[350px] sm:max-h-[400px] md:max-h-[450px] lg:max-h-[500px] object-contain hover:scale-105 transition-transform duration-500" 
               />
             </div>
           </motion.div>
@@ -322,7 +304,25 @@ const Home = () => {
             viewport={{ once: true, margin: '-50px' }}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
           >
-            {categories.map((cat, idx) => (
+            {categories.map((cat, idx) => {
+              // Map category names to specific images from all-images folder
+              let categoryImageUrl = cat.imageUrl;
+              const catName = (cat.name || '').toLowerCase();
+              if (!categoryImageUrl || categoryImageUrl.includes('unsplash')) {
+                if (catName.includes('school')) {
+                  categoryImageUrl = '/all-images/Onevendorsolutions/school.jpg';
+                } else if (catName.includes('home')) {
+                  categoryImageUrl = '/all-images/Onevendorsolutions/home.jpg';
+                } else if (catName.includes('office')) {
+                  categoryImageUrl = '/all-images/Onevendorsolutions/office-desk.jpg';
+                } else if (catName.includes('coaching')) {
+                  categoryImageUrl = '/all-images/Onevendorsolutions/projectro-office-school.jpg';
+                } else {
+                  categoryImageUrl = '/all-images/Onevendorsolutions/projectro-office-school.jpg';
+                }
+              }
+              
+              return (
               <motion.div 
                 key={cat.id} 
                 variants={fadeInUp}
@@ -330,7 +330,7 @@ const Home = () => {
               >
                 <div className="h-48 relative overflow-hidden">
                   <img 
-                    src={cat.imageUrl || "https://images.unsplash.com/photo-1548345680-f5475ea5df84?w=500"} 
+                    src={categoryImageUrl} 
                     alt={cat.name} 
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
                   />
@@ -353,7 +353,8 @@ const Home = () => {
                   </Link>
                 </div>
               </motion.div>
-            ))}
+              );
+            })}
           </motion.div>
         </div>
       </section>
@@ -401,12 +402,17 @@ const Home = () => {
           </div>
           
           <div className="lg:w-1/2 relative">
-            <div className="rounded-2xl overflow-hidden shadow-2xl">
-              <img 
-                src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=700" 
-                alt="Precision logistics and quality control facility" 
-                className="w-full h-[450px] object-cover" 
-              />
+            <div className="rounded-2xl overflow-hidden shadow-2xl bg-surface-container">
+              <video 
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-auto max-h-[600px] sm:max-h-[650px] md:max-h-[700px] lg:max-h-[750px] object-contain"
+              >
+                <source src="/all-images/Onevendorsolutions/latest_video_latest.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
             </div>
             <div className="absolute -bottom-6 -right-6 w-48 h-48 bg-gold-accent/5 rounded-full blur-3xl"></div>
           </div>
@@ -540,7 +546,7 @@ const Home = () => {
                 </div>
                 <div>
                   <h4 className="font-bold text-primary text-sm">Office Address</h4>
-                  <p className="text-on-surface-variant text-xs leading-relaxed mt-1">{settings?.address || 'Gorakhpur, Uttar Pradesh, India'}</p>
+                  <p className="text-on-surface-variant text-xs leading-relaxed mt-1">{settings?.address || 'Near water sport complex gorakhpur, Uttar Pradesh, India'}</p>
                 </div>
               </div>
 

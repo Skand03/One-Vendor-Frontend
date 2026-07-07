@@ -18,6 +18,9 @@ const AdminSidebar = () => {
     { path: '/admin/enquiries', icon: 'contact_support', label: 'Enquiries' },
     { path: '/admin/bookings', icon: 'event_available', label: 'Bookings' },
     { path: '/admin/products', icon: 'inventory_2', label: 'Catalog' },
+    { path: '/admin/projects', icon: 'work', label: 'Projects' },
+    { path: '/admin/gallery', icon: 'photo_library', label: 'Gallery' },
+    { path: '/admin/testimonials', icon: 'rate_review', label: 'Testimonials' },
     { path: '/admin/settings', icon: 'settings', label: 'Settings' }
   ];
 
