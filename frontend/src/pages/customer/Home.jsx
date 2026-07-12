@@ -314,7 +314,7 @@ const Home = () => {
               <img 
                 src="/all-images/Onevendorsolutions/home-page-broucher.png" 
                 alt="One Vendor Solutions - Premium B2B Procurement Brochure" 
-                className="w-full h-auto max-h-[350px] sm:max-h-[400px] md:max-h-[450px] lg:max-h-[500px] object-contain hover:scale-105 transition-transform duration-500" 
+                className="w-full h-[400px] sm:h-[450px] md:h-[500px] object-cover hover:scale-105 transition-transform duration-500" 
               />
             </div>
           </motion.div>
@@ -394,8 +394,8 @@ const Home = () => {
 
       {/* Why Choose Us */}
       <section className="py-xl bg-surface-container-low">
-        <div className="max-w-container-max mx-auto px-gutter flex flex-col lg:flex-row items-center gap-16">
-          <div className="lg:w-1/2 space-y-8">
+        <div className="max-w-container-max mx-auto px-gutter grid grid-cols-1 lg:grid-cols-2 gap-16 items-stretch">
+          <div className="space-y-8 flex flex-col justify-center">
             <h2 className="font-headline-lg text-3xl font-bold text-primary leading-tight">Setting the Gold Standard in Sourcing</h2>
             <p className="text-on-surface-variant text-sm leading-relaxed">We bring institutional discipline, wholesale cost benefits, and transparency to your supply pipeline.</p>
             
@@ -434,16 +434,16 @@ const Home = () => {
             </div>
           </div>
           
-          <div className="lg:w-1/2 relative">
-            <div className="rounded-2xl overflow-hidden shadow-2xl bg-surface-container">
+          <div className="relative flex items-center">
+            <div className="rounded-2xl overflow-hidden shadow-2xl bg-surface-container w-full h-full">
               <video 
                 autoPlay
                 loop
                 muted
                 playsInline
-                className="w-full h-auto max-h-[600px] sm:max-h-[650px] md:max-h-[700px] lg:max-h-[750px] object-contain"
+                className="w-full h-full object-contain"
               >
-                <source src="/all-images/Onevendorsolutions/latest_video_latest.mp4" type="video/mp4" />
+                <source src="/all-images/Onevendorsolutions/The_video_will_be_displayed_in.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             </div>
