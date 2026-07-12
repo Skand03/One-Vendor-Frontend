@@ -434,14 +434,14 @@ const Home = () => {
             </div>
           </div>
           
-          <div className="lg:w-1/2 relative">
-            <div className="rounded-2xl overflow-hidden shadow-2xl bg-surface-container">
+          <div className="lg:w-1/2 relative flex items-end">
+            <div className="rounded-2xl overflow-hidden shadow-2xl bg-surface-container w-full">
               <video 
                 autoPlay
                 loop
                 muted
                 playsInline
-                className="w-full h-auto max-h-[600px] sm:max-h-[650px] md:max-h-[700px] lg:max-h-[750px] object-contain"
+                className="w-full h-auto max-h-[550px] object-cover"
               >
                 <source src="/all-images/Onevendorsolutions/latest_video_latest.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
