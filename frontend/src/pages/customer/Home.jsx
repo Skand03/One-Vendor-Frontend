@@ -394,7 +394,7 @@ const Home = () => {
 
       {/* Why Choose Us */}
       <section className="py-xl bg-surface-container-low">
-        <div className="max-w-container-max mx-auto px-gutter flex flex-col lg:flex-row items-center gap-16">
+        <div className="max-w-container-max mx-auto px-gutter flex flex-col lg:flex-row items-stretch gap-16">
           <div className="lg:w-1/2 space-y-8">
             <h2 className="font-headline-lg text-3xl font-bold text-primary leading-tight">Setting the Gold Standard in Sourcing</h2>
             <p className="text-on-surface-variant text-sm leading-relaxed">We bring institutional discipline, wholesale cost benefits, and transparency to your supply pipeline.</p>
@@ -434,14 +434,14 @@ const Home = () => {
             </div>
           </div>
           
-          <div className="lg:w-1/2 relative flex items-end">
+          <div className="lg:w-1/2 relative flex flex-col justify-end">
             <div className="rounded-2xl overflow-hidden shadow-2xl bg-surface-container w-full">
               <video 
                 autoPlay
                 loop
                 muted
                 playsInline
-                className="w-full h-auto max-h-[550px] object-cover"
+                className="w-full h-full object-cover"
               >
                 <source src="/all-images/Onevendorsolutions/latest_video_latest.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
